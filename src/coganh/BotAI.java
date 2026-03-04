@@ -1,0 +1,80 @@
+package coganh;
+
+import java.util.ArrayList;
+
+public class BotAI {
+    
+    // Đã xóa DO_SAU_TOI_DA fix cứng để nhận tham số linh hoạt từ menu
+    
+    public NuocDi timNuocDiTotNhat(BanCo banCoHienTai, int pheCuaBot, int doKho) {
+        ArrayList<NuocDi> cacNuocDi = banCoHienTai.layCacNuocDiHopLe(pheCuaBot);
+
+        if (cacNuocDi.isEmpty()) {
+            return null; 
+        }
+
+        int diemTotNhat = Integer.MIN_VALUE; 
+        NuocDi nuocDiChon = cacNuocDi.get(0);
+
+        System.out.println("Bot đang suy nghĩ... (Depth " + doKho + " + Alpha-Beta Pruning)");
+
+        for (NuocDi nd : cacNuocDi) {
+            BanCo banCoNhap = banCoHienTai.copyNhap();
+            banCoNhap.diChuyenAo(nd, pheCuaBot);
+            
+            // Gọi thuật toán Minimax tối ưu có Alpha-Beta
+            int diemThucTe = minimax(banCoNhap, doKho - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+            nd.diemSo = diemThucTe; 
+
+            if (diemThucTe > diemTotNhat) {
+                diemTotNhat = diemThucTe;
+                nuocDiChon = nd;
+            }
+        }
+        
+        return nuocDiChon;
+    }
+
+    private int minimax(BanCo banCo, int doSau, int alpha, int beta, boolean laLuotCuaBot) {
+        if (doSau == 0) {
+            return banCo.chamDiem();
+        }
+
+        int pheHienTai = laLuotCuaBot ? -1 : 1; 
+        ArrayList<NuocDi> cacNuocDi = banCo.layCacNuocDiHopLe(pheHienTai);
+
+        // NHẬN DIỆN CHIẾU BÍ (VÂY CHẾT)
+        if (cacNuocDi.isEmpty()) {
+            return banCo.chamDiem() + (laLuotCuaBot ? -1000000 : 1000000); 
+        }
+
+        if (laLuotCuaBot) {
+            int maxEval = Integer.MIN_VALUE;
+            for (NuocDi nd : cacNuocDi) {
+                BanCo banCoMoi = banCo.copyNhap();
+                banCoMoi.diChuyenAo(nd, pheHienTai);
+                
+                int eval = minimax(banCoMoi, doSau - 1, alpha, beta, false);
+                maxEval = Math.max(maxEval, eval);
+                
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) break; // Alpha-Beta Pruning
+            }
+            return maxEval;
+            
+        } else {
+            int minEval = Integer.MAX_VALUE;
+            for (NuocDi nd : cacNuocDi) {
+                BanCo banCoMoi = banCo.copyNhap();
+                banCoMoi.diChuyenAo(nd, pheHienTai);
+                
+                int eval = minimax(banCoMoi, doSau - 1, alpha, beta, true);
+                minEval = Math.min(minEval, eval);
+                
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) break; // Alpha-Beta Pruning
+            }
+            return minEval;
+        }
+    }
+}

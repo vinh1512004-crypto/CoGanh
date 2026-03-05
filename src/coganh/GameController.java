@@ -23,7 +23,7 @@ public class GameController {
     public boolean chonBlue = true, chon, check, chuMo, moCo, checkOMo, checkOBiMo, huongDan, xemLichSu = false, isPvE = false;
     public int oDaChon, end = 0, oBatBuoc = -1, trangHD = 0, trangLS = 0;
     
-    public int cuonLichSu = 0; // Thêm biến này để lưu vị trí cuộn chuột
+    public int cuonLichSu = 0;
 
     public int undoCount = 0; 
     public static final int MAX_UNDO = 3; 
@@ -90,6 +90,23 @@ public class GameController {
         } else {
             khoiTao();
             gp.veLaiToanBo();
+        }
+    }
+
+    // ==========================================
+    // BỘ ĐỒNG BỘ: QUÉT CHÍNH XÁC QUÂN TRÊN BÀN CỜ
+    // ==========================================
+    public void dongBoQuanCo() {
+        quanDo.clear();
+        quanXanh.clear();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                if (board[i][j][2] == 1) {
+                    quanXanh.add(i * 10 + j);
+                } else if (board[i][j][2] == -1) {
+                    quanDo.add(i * 10 + j);
+                }
+            }
         }
     }
 
@@ -161,13 +178,11 @@ public class GameController {
     public void undoMove() {
         if (!isPvE || end != 0) return;
         
-        // 1. Kiểm tra nếu đang là lượt của Bot thì không được Undo
         if (!chonBlue) {
             JOptionPane.showMessageDialog(gp, "Vui lòng chờ Bot hoàn thành nước đi!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return; 
         }
 
-        // 2. Nếu người chơi đang chọn 1 quân cờ (nổi viền trắng) -> Undo mang tính chất HỦY CHỌN quân cờ đó
         if (chon || moCo) {
             if (!historyStack.isEmpty()) {
                 historyStack.get(historyStack.size() - 1).restore();
@@ -176,19 +191,16 @@ public class GameController {
             return;
         }
 
-        // 3. Nếu chưa đi nước nào mà đã bấm Undo
         if (historyStack.size() <= 1) {
             JOptionPane.showMessageDialog(gp, "Bạn chưa đi nước nào, không thể quay lại!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        // 4. Nếu đã sử dụng hết lượt Undo
         if (undoCount >= MAX_UNDO) {
             JOptionPane.showMessageDialog(gp, "Bạn đã sử dụng hết " + MAX_UNDO + " lượt đi lại trong ván này!", "Hết lượt", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // 5. Thực hiện Undo lùi lại ván trước
         historyStack.remove(historyStack.size() - 1); 
         historyStack.get(historyStack.size() - 1).restore(); 
         undoCount++; 
@@ -256,6 +268,10 @@ public class GameController {
             this.listMo = loadList(sc.nextLine()); this.listBiMo = loadList(sc.nextLine());
             
             sc.close();
+            
+            // CHẠY LỆNH ĐỒNG BỘ ĐỂ XÓA RÁC TỪ FILE SAVE CŨ
+            dongBoQuanCo(); 
+            
             return true;
             
         } catch (Exception e) { 
@@ -352,61 +368,54 @@ public class GameController {
     }
 
     public void goiYNuocDi() {
-    if (!isPvE || !chonBlue || end != 0) return;
+        if (!isPvE || !chonBlue || end != 0) return;
 
-    // 2. Kiểm tra giới hạn số lần hỗ trợ
-    if (helpCount >= MAX_HELP) {
-        JOptionPane.showMessageDialog(gp, "Bạn đã hết 3 lần trợ giúp trong ván này!", "Hết lượt", JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-
-    // 3. Nếu đang dở nước đi (đã chọn quân) thì yêu cầu hủy chọn trước
-    if (chon || moCo) {
-        JOptionPane.showMessageDialog(gp, "Vui lòng bỏ chọn quân cờ hiện tại để nhận gợi ý mới!", "Gợi ý", JOptionPane.INFORMATION_MESSAGE);
-        return;
-    }
-
-    System.out.println("Đang tìm gợi ý tốt nhất cho bạn...");
-    BanCo banCoAo = new BanCo();
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 5; j++) {
-            banCoAo.maTran[i][j] = board[i][j][2];
+        if (helpCount >= MAX_HELP) {
+            JOptionPane.showMessageDialog(gp, "Bạn đã hết 3 lần trợ giúp trong ván này!", "Hết lượt", JOptionPane.WARNING_MESSAGE);
+            return;
         }
-    }
-    
-    // Xử lý trường hợp đang bị "Mở cờ"
-    if (chuMo && oBatBuoc != -1) {
-        banCoAo.hangBatBuoc = oBatBuoc / 10;
-        banCoAo.cotBatBuoc = oBatBuoc % 10;
-    }
 
-    BotAI ai = new BotAI();
-    // Sử dụng độ sâu 4 để tìm nước đi chất lượng
-    NuocDi ndTotNhat = ai.timNuocDiTotNhat(banCoAo, 1, 4); 
+        if (chon || moCo) {
+            JOptionPane.showMessageDialog(gp, "Vui lòng bỏ chọn quân cờ hiện tại để nhận gợi ý mới!", "Gợi ý", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
 
-    if (ndTotNhat != null) {
-        // 4. Thực hiện "Chọn hộ" quân cờ
-        // Lưu ý: Ta gọi chonO nhưng không kết thúc nước đi, chỉ để hiện gợi ý
-        chonO(ndTotNhat.hangCu, ndTotNhat.cotCu, false);
-        
-        // 5. Xóa các chấm trắng không phải là hướng đi tốt nhất (để chỉ chỉ ra 1 hướng duy nhất)
+        System.out.println("Đang tìm gợi ý tốt nhất cho bạn...");
+        BanCo banCoAo = new BanCo();
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 5; j++) {
-                if (board[i][j][2] == 3) {
-                    if (i != ndTotNhat.hangMoi || j != ndTotNhat.cotMoi) {
-                        board[i][j][2] = 0; // Xóa các hướng không ưu tiên
-                    }
-                }
+                banCoAo.maTran[i][j] = board[i][j][2];
             }
         }
         
-        helpCount++; // Tăng số lần đã dùng
-        gp.veLaiToanBo();
-        System.out.println("Gợi ý: Đi từ (" + ndTotNhat.hangCu + "," + ndTotNhat.cotCu + ") tới (" + ndTotNhat.hangMoi + "," + ndTotNhat.cotMoi + ")");
-    } else {
-        JOptionPane.showMessageDialog(gp, "Không tìm thấy nước đi an toàn nào lúc này!", "Xin lỗi", JOptionPane.INFORMATION_MESSAGE);
+        if (chuMo && oBatBuoc != -1) {
+            banCoAo.hangBatBuoc = oBatBuoc / 10;
+            banCoAo.cotBatBuoc = oBatBuoc % 10;
+        }
+
+        BotAI ai = new BotAI();
+        NuocDi ndTotNhat = ai.timNuocDiTotNhat(banCoAo, 1, 4); 
+
+        if (ndTotNhat != null) {
+            chonO(ndTotNhat.hangCu, ndTotNhat.cotCu, false);
+            
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    if (board[i][j][2] == 3) {
+                        if (i != ndTotNhat.hangMoi || j != ndTotNhat.cotMoi) {
+                            board[i][j][2] = 0; 
+                        }
+                    }
+                }
+            }
+            
+            helpCount++; 
+            gp.veLaiToanBo();
+            System.out.println("Gợi ý: Đi từ (" + ndTotNhat.hangCu + "," + ndTotNhat.cotCu + ") tới (" + ndTotNhat.hangMoi + "," + ndTotNhat.cotMoi + ")");
+        } else {
+            JOptionPane.showMessageDialog(gp, "Không tìm thấy nước đi an toàn nào lúc này!", "Xin lỗi", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
-}
 
     void xuLyChuot(int x, int y) {
         if (!huongDan && !xemLichSu && new Rectangle(940, 520, 50, 50).contains(x, y)) {
@@ -420,20 +429,12 @@ public class GameController {
                     gp.resetGame(); return;
                 }
                 
-                // KIỂM TRA CLICK CÁC NÚT PVE VỚI TOẠ ĐỘ VÙNG CLICK ĐÃ ĐƯỢC CHỈNH CHUẨN XÁC
                 if (isPvE && end == 0) {
-                    // Mở rộng vùng chiều cao (Y) cho dễ bấm (440 đến 510)
                     if (y >= 440 && y <= 510) {
-                        
-                        // 1. NÚT BÓNG ĐÈN (Thu hẹp vùng click vào sát icon) 
-                        // Toạ độ X từ 720 đến 780 (Đảm bảo không lấn sang phải)
                         if (x >= 680 && x <= 740) { 
                             goiYNuocDi(); 
                             return; 
                         } 
-                        
-                        // 2. NÚT QUAY LẠI (Mở rộng vùng click sang bên phải)
-                        // Toạ độ X bắt đầu từ 785 (cách xa bóng đèn) kéo dài đến 870
                         else if (x >= 755 && x <= 845) { 
                             undoMove(); 
                             return; 
@@ -576,11 +577,15 @@ public class GameController {
                 board[i][j][2] = -1; quanDo.remove(Integer.valueOf(oDaChon)); quanDo.add(i * 10 + j);
             }
             
-            ktraGanh(i, j, board[i][j][2]); vayQuan(board[i][j][2]);
+            ktraGanh(i, j, board[i][j][2]); 
+            dongBoQuanCo(); // Đồng bộ sau khi Gánh
+            
+            vayQuan(board[i][j][2]);
+            dongBoQuanCo(); // Đồng bộ sau khi Vây
+            
             chon = false; chonBlue = !chonBlue;
             
-            if (quanDo.size() == 0) { end = 1; sm.addResult("XANH", isPvE); deleteCurrentSaveFile(); }
-            else if (quanDo.size() == 16) { end = -1; sm.addResult("DO", isPvE); deleteCurrentSaveFile(); }
+            kiemTraKetThuc();
 
             if (!moCo && veLai) chuMo = false; 
 
@@ -655,11 +660,15 @@ public class GameController {
                     board[i][j][2] = -1; quanDo.remove(Integer.valueOf(oDaChon)); quanDo.add(i * 10 + j);
                 }
                 
-                ktraGanh(i, j, board[i][j][2]); vayQuan(board[i][j][2]);
+                ktraGanh(i, j, board[i][j][2]); 
+                dongBoQuanCo(); // Đồng bộ
+                
+                vayQuan(board[i][j][2]);
+                dongBoQuanCo(); // Đồng bộ
+                
                 chon = false; chonBlue = !chonBlue;
                 
-                if (quanDo.size() == 0) { end = 1; sm.addResult("XANH", isPvE); deleteCurrentSaveFile(); }
-                else if (quanDo.size() == 16) { end = -1; sm.addResult("DO", isPvE); deleteCurrentSaveFile(); }
+                kiemTraKetThuc();
                 
                 if (isPvE && end == 0) {
                     if (chonBlue && chuMo) {
@@ -715,13 +724,6 @@ public class GameController {
 
     private void anQuan(int i1, int j1, int o, int i2, int j2) {
         board[i1][j1][2] = o; board[i2][j2][2] = o;
-        if (o > 0) {
-            quanDo.remove(Integer.valueOf(i1 * 10 + j1)); quanDo.remove(Integer.valueOf(i2 * 10 + j2));
-            quanXanh.add(i1 * 10 + j1); quanXanh.add(i2 * 10 + j2);
-        } else {
-            quanDo.add(i1 * 10 + j1); quanDo.add(i2 * 10 + j2);
-            quanXanh.remove(Integer.valueOf(i1 * 10 + j1)); quanXanh.remove(Integer.valueOf(i2 * 10 + j2));
-        }
     }
 
     void ktraGanh(int i, int j, int o) {
@@ -790,8 +792,6 @@ public class GameController {
                     for (int z = 0; z < t; z++) {
                         board[oKe.get(z) / 10][oKe.get(z) % 10][2] = o;
                         vay.remove(oKe.get(z));
-                        if (o > 0) { quanDo.remove(oKe.get(z)); quanXanh.add(oKe.get(z)); } 
-                        else { quanXanh.remove(oKe.get(z)); quanDo.add(oKe.get(z)); }
                     }
                 }
             }
@@ -836,4 +836,36 @@ public class GameController {
     }
 
     private boolean ktra(int a) { return a >= 0 && a < 5; }
+
+    private void kiemTraKetThuc() {
+        if (quanDo.size() == 0) { 
+            end = 1; sm.addResult("XANH", isPvE); deleteCurrentSaveFile(); 
+        } 
+        else if (quanXanh.size() == 0) { 
+            end = -1; sm.addResult("DO", isPvE); deleteCurrentSaveFile(); 
+        } 
+        else {
+            BanCo bc = new BanCo();
+            for(int i = 0; i < 5; i++) {
+                for(int j = 0; j < 5; j++) {
+                    bc.maTran[i][j] = board[i][j][2];
+                }
+            }
+            if (chuMo && oBatBuoc != -1) {
+                bc.hangBatBuoc = oBatBuoc / 10;
+                bc.cotBatBuoc = oBatBuoc % 10;
+            }
+            
+            int pheHienTai = chonBlue ? 1 : -1;
+            if (bc.layCacNuocDiHopLe(pheHienTai).isEmpty()) {
+                if (chonBlue) {
+                    System.out.println("Xanh bị vây chặt hết đường đi! ĐỎ THẮNG!");
+                    end = -1; sm.addResult("DO", isPvE); deleteCurrentSaveFile();
+                } else {
+                    System.out.println("Đỏ bị vây chặt hết đường đi! XANH THẮNG!");
+                    end = 1; sm.addResult("XANH", isPvE); deleteCurrentSaveFile();
+                }
+            }
+        }
+    }
 }

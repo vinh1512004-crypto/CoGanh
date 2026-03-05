@@ -43,9 +43,10 @@ public class BotAI {
         int pheHienTai = laLuotCuaBot ? -1 : 1; 
         ArrayList<NuocDi> cacNuocDi = banCo.layCacNuocDiHopLe(pheHienTai);
 
-        // NHẬN DIỆN CHIẾU BÍ (VÂY CHẾT)
+     // NHẬN DIỆN CHIẾU BÍ (VÂY CHẾT)
         if (cacNuocDi.isEmpty()) {
-            return banCo.chamDiem() + (laLuotCuaBot ? -1000000 : 1000000); 
+            // CỘNG THÊM doSau ĐỂ ƯU TIÊN KẾT THÚC NHANH
+            return banCo.chamDiem() + (laLuotCuaBot ? (-1000000 - doSau) : (1000000 + doSau)); 
         }
 
         if (laLuotCuaBot) {

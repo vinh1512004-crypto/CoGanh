@@ -497,7 +497,7 @@ public class GameController {
                         if (trangHD < 2) trangHD++; if(gp.hd[trangHD] != null) gp.hdImg = gp.hd[trangHD]; gp.repaint();
                     } else if (new Rectangle(750, 490, 50, 50).contains(x, y)) {
                         if (trangHD > 0) trangHD--; if(gp.hd[trangHD] != null) gp.hdImg = gp.hd[trangHD]; gp.repaint();
-                    } else if (new Rectangle(15, 520, 50, 50).contains(x, y)) {
+                    } else if (new Rectangle(15, 30 , 50, 50).contains(x, y)) {
                         huongDan = false; gp.veMenu();
                     }
                 }

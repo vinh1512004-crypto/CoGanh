@@ -176,10 +176,20 @@ public class GamePanel_CoGanh extends JPanel {
             for (int i = recent.size() - 1; i >= 0; i--) {
                 String record = recent.get(i);
                 String[] parts = record.split("\\|");
-                String winnerRaw = parts[0]; String mode = (parts.length > 1) ? parts[1] : "PvP";
-                String winnerText = winnerRaw.equals("XANH") ? "Xanh Thắng" : "Đỏ Thắng";
-                Color c = winnerRaw.equals("XANH") ? Color.CYAN : Color.RED;
+                String winnerRaw = parts[0]; 
+                String mode = (parts.length > 1) ? parts[1] : "PvP";
 
+                String winnerText;
+                Color c;
+
+// Phân tách logic hiển thị theo chế độ chơi
+            if (mode.equals("PvP")) {
+                winnerText = winnerRaw.equals("XANH") ? "Quân Xanh" : "Quân Đỏ";
+                c = winnerRaw.equals("XANH") ? Color.CYAN : Color.RED;
+            } else { // Chế độ PvE
+                winnerText = winnerRaw.equals("XANH") ? "Người thắng" : "Máy thắng";
+                c = winnerRaw.equals("XANH") ? Color.CYAN : Color.RED;
+}
                 g.setColor(Color.WHITE); g.drawString("#" + (total - (recent.size() - 1 - i)), 200, y);
                 g.setColor(Color.GREEN); g.drawString(mode, 450, y);
                 g.setColor(c); g.drawString(winnerText, 700, y);
@@ -205,8 +215,8 @@ public class GamePanel_CoGanh extends JPanel {
 
             g.setFont(new Font("Times New Roman", Font.PLAIN, 30));
             g.setColor(Color.CYAN); g.drawString("Tổng số ván đã chơi: " + totalPvE, 150, 160);
-            g.setColor(Color.BLUE); g.drawString(String.format("XANH THẮNG: %d ván (%.1f%%)", bluePvE, blueRate), 150, 230);
-            g.setColor(Color.RED); g.drawString(String.format("ĐỎ THẮNG: %d ván (%.1f%%)", redPvE, redRate), 150, 300);
+            g.setColor(Color.BLUE); g.drawString(String.format("NGƯỜI THẮNG: %d ván (%.1f%%)", bluePvE, blueRate), 150, 230);
+            g.setColor(Color.RED); g.drawString(String.format("MÁY THẮNG: %d ván (%.1f%%)", redPvE, redRate), 150, 300);
 
             int barX = 150, barY = 360, barWidth = 700, barHeight = 45;
             g.setFont(new Font("Arial", Font.BOLD, 22));
@@ -326,8 +336,8 @@ public class GamePanel_CoGanh extends JPanel {
                 g.setColor(Color.yellow);
                 g.drawString("Tiếp tục", 192, 350);
                 g.setColor(Color.white);
-                if (gc.end == 1) g.drawString("Xanh thắng", 150, 250);
-                else if (gc.end == -1) g.drawString("Đỏ thắng", 180, 250);
+                if (gc.end == 1) g.drawString("Người thắng", 150, 250);
+                else if (gc.end == -1) g.drawString("Máy thắng", 180, 250);
             }
             g.dispose();
         }
@@ -350,7 +360,7 @@ public class GamePanel_CoGanh extends JPanel {
                 if (hdImg != null) g2.drawImage(hdImg, 100, 30, 800, 540, this);
                 if (right != null) g2.drawImage(right, 810, 490, 50, 50, this);
                 if (left != null) g2.drawImage(left, 750, 490, 50, 50, this);
-                if (back != null) g2.drawImage(back, 15, 520, 50, 50, this);
+                if (back != null) g2.drawImage(back, 15, 30, 50, 50, this);
             }
         }
 

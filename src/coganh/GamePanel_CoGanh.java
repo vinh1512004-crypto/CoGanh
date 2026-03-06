@@ -336,8 +336,13 @@ public class GamePanel_CoGanh extends JPanel {
                 g.setColor(Color.yellow);
                 g.drawString("Tiếp tục", 192, 350);
                 g.setColor(Color.white);
+            if (gc.isPvE) {
                 if (gc.end == 1) g.drawString("Người thắng", 150, 250);
                 else if (gc.end == -1) g.drawString("Máy thắng", 180, 250);
+            } else {
+                if (gc.end == 1) g.drawString("Xanh thắng", 160, 250);
+                else if (gc.end == -1) g.drawString("Đỏ thắng", 190, 250);
+            }
             }
             g.dispose();
         }

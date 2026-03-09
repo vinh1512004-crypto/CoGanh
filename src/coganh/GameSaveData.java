@@ -10,10 +10,10 @@ public class GameSaveData implements Serializable {
     // Các biến lưu trữ bàn cờ và trạng thái logic
     public int[][][] board;
     public boolean chonBlue, chon, check, chuMo, moCo, checkOMo, checkOBiMo, isPvE;
-    
+
     // Đã bổ sung thêm undoCount vào đây
-    public int oDaChon, oBatBuoc, undoCount; 
-    
+    public int oDaChon, oBatBuoc, undoCount, doKhoAI, helpCount;
+
     // Các danh sách quân cờ và nước đi
     public ArrayList<Integer> quanDo;
     public ArrayList<Integer> quanXanh;
@@ -21,11 +21,11 @@ public class GameSaveData implements Serializable {
     public ArrayList<Integer> listBiMo;
 
     // Constructor nhận tất cả dữ liệu cần thiết để tái tạo lại ván cờ
-    public GameSaveData(int[][][] board, boolean chonBlue, boolean chon, boolean check, boolean chuMo, 
-                        boolean moCo, boolean checkOMo, boolean checkOBiMo, boolean isPvE,
-                        int oDaChon, int oBatBuoc, int undoCount,
-                        ArrayList<Integer> quanDo, ArrayList<Integer> quanXanh, 
-                        ArrayList<Integer> listMo, ArrayList<Integer> listBiMo) {
+    public GameSaveData(int[][][] board, boolean chonBlue, boolean chon, boolean check, boolean chuMo,
+            boolean moCo, boolean checkOMo, boolean checkOBiMo, boolean isPvE,
+            int oDaChon, int oBatBuoc, int undoCount, int doKhoAI, int helpCount,
+            ArrayList<Integer> quanDo, ArrayList<Integer> quanXanh,
+            ArrayList<Integer> listMo, ArrayList<Integer> listBiMo) {
         this.board = board;
         this.chonBlue = chonBlue;
         this.chon = chon;
@@ -37,10 +37,142 @@ public class GameSaveData implements Serializable {
         this.isPvE = isPvE;
         this.oDaChon = oDaChon;
         this.oBatBuoc = oBatBuoc;
-        this.undoCount = undoCount; // Khởi tạo giá trị undo
+        this.undoCount = undoCount;
+        this.doKhoAI = doKhoAI;
+        this.helpCount = helpCount;
         this.quanDo = quanDo;
         this.quanXanh = quanXanh;
         this.listMo = listMo;
         this.listBiMo = listBiMo;
+    }
+
+    public static void saveToFile(GameController gc, String fileName) {
+        try {
+            java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.File(fileName));
+            pw.println(" TRANGTHAI ");
+            pw.println(gc.isPvE + " " + gc.chonBlue + " " + gc.chon + " " + gc.check + " " + gc.chuMo + " " + gc.moCo
+                    + " " + gc.checkOMo
+                    + " " + gc.checkOBiMo);
+            pw.println(" BIENSO ");
+            pw.println(gc.oDaChon + " " + gc.oBatBuoc + " " + gc.undoCount + " " + gc.doKhoAI + " " + gc.helpCount + " "
+                    + gc.timeLeftBlue + " " + gc.timeLeftRed);
+            pw.println(" BANCO ");
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    pw.printf("%2d ", gc.board[i][j][2]);
+                }
+                pw.println();
+            }
+            pw.println(" DANHSACH ");
+            saveList(pw, gc.quanDo);
+            saveList(pw, gc.quanXanh);
+            saveList(pw, gc.listMo);
+            saveList(pw, gc.listBiMo);
+            pw.close();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void saveList(java.io.PrintWriter pw, ArrayList<Integer> list) {
+        if (list.isEmpty())
+            pw.println("-");
+        else {
+            for (Integer val : list)
+                pw.print(val + " ");
+            pw.println();
+        }
+    }
+
+    public static boolean loadFromFile(GameController gc, String fileName) {
+        java.io.File f = new java.io.File(fileName);
+        if (!f.exists())
+            return false;
+
+        try {
+            java.util.Scanner sc = new java.util.Scanner(f);
+
+            while (sc.hasNextLine())
+                if (sc.nextLine().contains(" TRANGTHAI "))
+                    break;
+            gc.isPvE = sc.nextBoolean();
+            gc.chonBlue = sc.nextBoolean();
+            gc.chon = sc.nextBoolean();
+            gc.check = sc.nextBoolean();
+            gc.chuMo = sc.nextBoolean();
+            gc.moCo = sc.nextBoolean();
+            gc.checkOMo = sc.nextBoolean();
+            gc.checkOBiMo = sc.nextBoolean();
+
+            while (sc.hasNextLine())
+                if (sc.nextLine().contains(" BIENSO "))
+                    break;
+            gc.oDaChon = sc.nextInt();
+            gc.oBatBuoc = sc.nextInt();
+            if (sc.hasNextInt()) {
+                gc.undoCount = sc.nextInt();
+            } else {
+                gc.undoCount = 0;
+            }
+            if (sc.hasNextInt()) {
+                int doKhoCu = sc.nextInt();
+                System.out.println("Ván cũ (Depth " + doKhoCu + ") -> Đổi sang độ khó mới (Depth " + gc.doKhoAI + ")");
+            }
+            if (sc.hasNextInt()) {
+                gc.helpCount = sc.nextInt();
+            } else {
+                gc.helpCount = 0;
+            }
+            if (sc.hasNextInt()) {
+                gc.timeLeftBlue = sc.nextInt();
+                gc.timeLeftRed = sc.nextInt();
+            } else {
+                gc.timeLeftBlue = 600;
+                gc.timeLeftRed = 600;
+            }
+
+            while (sc.hasNextLine())
+                if (sc.nextLine().contains(" BANCO "))
+                    break;
+            for (int i = 0; i < 5; i++)
+                for (int j = 0; j < 5; j++)
+                    gc.board[i][j][2] = sc.nextInt();
+
+            while (sc.hasNextLine())
+                if (sc.nextLine().contains(" DANHSACH "))
+                    break;
+
+            if (sc.hasNextLine())
+                sc.nextLine();
+
+            gc.quanDo = loadList(sc.nextLine());
+            gc.quanXanh = loadList(sc.nextLine());
+            gc.listMo = loadList(sc.nextLine());
+            gc.listBiMo = loadList(sc.nextLine());
+
+            sc.close();
+
+            gc.dongBoQuanCo();
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static ArrayList<Integer> loadList(String line) {
+        ArrayList<Integer> list = new ArrayList<>();
+        line = line.trim();
+        if (line.equals("-") || line.isEmpty())
+            return list;
+        String[] parts = line.split(" ");
+        for (String s : parts)
+            try {
+                list.add(Integer.parseInt(s));
+            } catch (Exception e) {
+            }
+        return list;
     }
 }

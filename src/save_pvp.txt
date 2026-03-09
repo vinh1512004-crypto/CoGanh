@@ -1,0 +1,15 @@
+ TRANGTHAI 
+false false false false false false false false
+ BIENSO 
+21 -1 0 4 0 590 595
+ BANCO 
+-1 -1 -1 -1 -1 
+-1  0  0  0 -1 
+ 0  0  1 -1  0 
+ 1  0  0  0  1 
+ 1  1  1  1  1 
+ DANHSACH 
+0 1 2 3 4 10 14 23 
+22 30 34 40 41 42 43 44 
+-
+-

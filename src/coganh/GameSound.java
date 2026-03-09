@@ -24,7 +24,7 @@ public class GameSound {
 		try {
 			clip = AudioSystem.getClip();
 			clip.open(audio);
-//			clip.loop(Clip.LOOP_CONTINUOUSLY);
+			// clip.loop(Clip.LOOP_CONTINUOUSLY);
 		} catch (Exception e) {
 			System.out.println("Exception");
 		}
@@ -44,4 +44,3 @@ public class GameSound {
 	}
 
 }
-

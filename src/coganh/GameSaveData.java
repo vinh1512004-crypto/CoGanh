@@ -126,9 +126,11 @@ public class GameSaveData implements Serializable {
             if (sc.hasNextInt()) {
                 gc.timeLeftBlue = sc.nextInt();
                 gc.timeLeftRed = sc.nextInt();
+                System.out.println("DEBUG: loaded timeLeftBlue=" + gc.timeLeftBlue + " timeLeftRed=" + gc.timeLeftRed);
             } else {
                 gc.timeLeftBlue = 600;
                 gc.timeLeftRed = 600;
+                System.out.println("DEBUG: Failed to load timer, defaulted to 600");
             }
 
             while (sc.hasNextLine())
@@ -141,9 +143,6 @@ public class GameSaveData implements Serializable {
             while (sc.hasNextLine())
                 if (sc.nextLine().contains(" DANHSACH "))
                     break;
-
-            if (sc.hasNextLine())
-                sc.nextLine();
 
             gc.quanDo = loadList(sc.nextLine());
             gc.quanXanh = loadList(sc.nextLine());

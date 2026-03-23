@@ -1,5 +1,6 @@
 package coganh;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,6 +14,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 public class GamePanel_CoGanh extends JPanel {
@@ -25,6 +29,8 @@ public class GamePanel_CoGanh extends JPanel {
     private BufferedImage boardImg, background, backgr;
 
     public GameController gc;
+    public JMenuBar menuBar;
+    public JMenu categoryMenu, utilityMenu, settingsMenu;
 
     public boolean start;
     public GameSound music = new GameSound();
@@ -34,44 +40,117 @@ public class GamePanel_CoGanh extends JPanel {
         loadImage();
 
         JFrame mainFrame = new JFrame();
-
         if (logoImg != null) {
             mainFrame.setIconImage(logoImg);
         }
-
-        mainFrame.setSize(SCREEN_WIDTH + 15, SCREEN_HEIGHT + 37);
+        mainFrame.setTitle("Cờ Gánh Việt Nam");
+        mainFrame.setLayout(new BorderLayout());
 
         this.addMouseListener(new MouseControl(this));
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (gc != null && gc.xemLichSu && gc.trangLS == 0) {
-                    // Mỗi nấc lăn chuột sẽ cuộn 30 pixel
                     gc.cuonLichSu += e.getWheelRotation() * 30;
-
-                    // Giới hạn cuộn lên trên cùng
-                    if (gc.cuonLichSu < 0)
-                        gc.cuonLichSu = 0;
-
-                    // Giới hạn cuộn xuống dưới cùng
+                    if (gc.cuonLichSu < 0) gc.cuonLichSu = 0;
                     int totalGames = gc.sm.getTotalGames();
-                    int maxScroll = Math.max(0, (totalGames * 30) - 360); // 360 là chiều cao vùng hiển thị
-                    if (gc.cuonLichSu > maxScroll)
-                        gc.cuonLichSu = maxScroll;
-
+                    int maxScroll = Math.max(0, (totalGames * 30) - 360);
+                    if (gc.cuonLichSu > maxScroll) gc.cuonLichSu = maxScroll;
                     veMenu();
                 }
             }
         });
 
+        // Khởi tạo Thanh Menu (MenuBar)
+        menuBar = new JMenuBar();
+        menuBar.setBackground(new Color(60, 0, 120)); // Màu tím đậm
+        menuBar.setBorderPainted(false);
+
+        Color menuTextColor = Color.WHITE;
+        Font menuFont = new Font("Arial", Font.BOLD, 14);
+
+        // --- Menu THỂ LOẠI (PvP & PvE) ---
+        categoryMenu = new JMenu("Thể loại");
+        categoryMenu.setForeground(menuTextColor);
+        categoryMenu.setFont(menuFont);
+
+        JMenuItem pvpItem = new JMenuItem("Phòng PvP (Người vs Người)");
+        JMenu pveSubMenu = new JMenu("Phòng PvE (Người vs Máy)");
+        
+        JMenuItem pveEasyItem = new JMenuItem("Easy");
+        JMenuItem pveMedItem = new JMenuItem("Medium");
+        JMenuItem pveHardItem = new JMenuItem("Hard");
+
+        pvpItem.addActionListener(e -> gc.kiemTraVaVaoGame(false));
+        pveEasyItem.addActionListener(e -> { gc.doKhoAI = 1; gc.kiemTraVaVaoGame(true); });
+        pveMedItem.addActionListener(e -> { gc.doKhoAI = 2; gc.kiemTraVaVaoGame(true); });
+        pveHardItem.addActionListener(e -> { gc.doKhoAI = 4; gc.kiemTraVaVaoGame(true); });
+
+        pveSubMenu.add(pveEasyItem);
+        pveSubMenu.add(pveMedItem);
+        pveSubMenu.add(pveHardItem);
+
+        categoryMenu.add(pvpItem);
+        categoryMenu.add(pveSubMenu);
+
+        // --- Menu TIỆN ÍCH ---
+        utilityMenu = new JMenu("Tiện ích");
+        utilityMenu.setForeground(menuTextColor);
+        utilityMenu.setFont(menuFont);
+
+        JMenuItem hdItem = new JMenuItem("Hướng dẫn");
+        JMenuItem lsItem = new JMenuItem("Xem lịch sử đấu");
+        JMenuItem undoItem = new JMenuItem("Đi lại (Undo)");
+        JMenuItem hintItem = new JMenuItem("Gợi ý (Hint)");
+
+        hdItem.addActionListener(e -> { 
+            if (hd[0] != null) hdImg = hd[0];
+            gc.huongDan = true; 
+            veMenu(); 
+        });
+        lsItem.addActionListener(e -> { gc.xemLichSu = true; gc.trangLS = 0; gc.cuonLichSu = 0; veMenu(); });
+        undoItem.addActionListener(e -> gc.undoMove());
+        hintItem.addActionListener(e -> gc.goiYNuocDi());
+
+        utilityMenu.add(hdItem);
+        utilityMenu.add(lsItem);
+
+        // --- Menu CÀI ĐẶT ---
+        settingsMenu = new JMenu("Cài đặt");
+        settingsMenu.setForeground(menuTextColor);
+        settingsMenu.setFont(menuFont);
+
+        JMenuItem soundItem = new JMenuItem("Âm thanh (Bật/Tắt)");
+        JMenuItem exitItem = new JMenuItem("Thoát");
+        soundItem.addActionListener(e -> {
+            soundOn = !soundOn;
+            if (!soundOn) music.stopMusic();
+            else music.batDau();
+            repaint();
+        });
+        exitItem.addActionListener(e -> System.exit(0));
+
+        settingsMenu.add(soundItem);
+        settingsMenu.addSeparator();
+        settingsMenu.add(exitItem);
+
+        menuBar.add(categoryMenu);
+        menuBar.add(utilityMenu);
+        menuBar.add(settingsMenu);
+
         gc = new GameController(this);
 
-        mainFrame.getContentPane().add(this);
-        this.repaint();
-        this.setVisible(true);
+        mainFrame.setJMenuBar(menuBar);
+        mainFrame.add(this, BorderLayout.CENTER);
 
-        mainFrame.setTitle("Cờ Gánh Việt Nam");
+        // Không cần tăng chiều cao frame nhiều vì setJMenuBar không chiếm chỗ trong content pane
+        mainFrame.setSize(SCREEN_WIDTH + 15, SCREEN_HEIGHT + 37 + 25);
+        
+        this.repaint();
         mainFrame.setLocationRelativeTo(null);
+        mainFrame.setResizable(false);
+        mainFrame.setVisible(true);
+
         music.batDau();
 
         mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -93,7 +172,7 @@ public class GamePanel_CoGanh extends JPanel {
             back = ImageIO.read(getClass().getResourceAsStream("back.png"));
             background = ImageIO.read(getClass().getResourceAsStream("br_coganh.jpg"));
             boardImg = ImageIO.read(getClass().getResourceAsStream("board.jpg"));
-            backgr = ImageIO.read(getClass().getResourceAsStream("bgr_cg2.png"));
+            backgr = ImageIO.read(getClass().getResourceAsStream("brg.png"));
             on = ImageIO.read(getClass().getResourceAsStream("on.png"));
             off = ImageIO.read(getClass().getResourceAsStream("off.png"));
             hd[0] = ImageIO.read(getClass().getResourceAsStream("hd1.jpg"));
@@ -122,8 +201,10 @@ public class GamePanel_CoGanh extends JPanel {
     public void veMenu() {
         if (backgr == null)
             return;
-        background_paint = copyImage(backgr);
+        // Luôn sử dụng 1000x600 để các tọa độ vẽ thống nhất
+        background_paint = new BufferedImage(1000, 600, BufferedImage.TYPE_INT_ARGB);
         Graphics g = background_paint.createGraphics();
+        g.drawImage(backgr, 0, 0, 1000, 600, null); // Vẽ và scale ảnh nền vào 1000x600
 
         if (gc != null) {
             if (gc.dangChonDoKho) {
@@ -137,12 +218,7 @@ public class GamePanel_CoGanh extends JPanel {
                 g.setColor(Color.red);
                 g.drawString("Quay Lại", 40, 280);
             } else if (!gc.huongDan && !gc.xemLichSu) {
-                g.setColor(Color.red);
-                g.setFont(new Font("Times New Roman", Font.BOLD, 50));
-                g.drawString("PvP", 40, 70);
-                g.drawString("PvE", 40, 140);
-                g.drawString("Hướng dẫn", 40, 210);
-                g.drawString("Lịch sử đấu", 40, 280);
+                // Đã xóa vẽ chữ đè hình (PvP, PvE, Hướng dẫn, Lịch sử đấu)
             } else if (gc.xemLichSu) {
                 veBangLichSu(g);
             }
@@ -274,16 +350,19 @@ public class GamePanel_CoGanh extends JPanel {
     }
 
     public void veLaiToanBo() {
+        background_paint = new BufferedImage(1000, 600, BufferedImage.TYPE_INT_ARGB);
+        Graphics g_bg = background_paint.createGraphics();
+        
         if (background != null)
-            background_paint = copyImage(background);
+            g_bg.drawImage(background, 0, 0, 1000, 600, null);
         else if (backgr != null)
-            background_paint = copyImage(backgr);
+            g_bg.drawImage(backgr, 0, 0, 1000, 600, null);
 
         if (background_paint != null && gc != null) {
-            Graphics g = background_paint.createGraphics();
+            Graphics g = g_bg; // Sử dụng graphics của background_paint luôn
             g.setColor(Color.BLACK);
-            g.setFont(new Font("Times New Roman", Font.BOLD, 40));
-            g.drawString("Menu", 960, 50);
+            g.setFont(new Font("Times New Roman", Font.BOLD, 30));
+            g.drawString("Menu", 895, 50);
 
             g.setColor(new Color(147, 112, 219));
             g.fillRoundRect(730, 20, 130, 50, 30, 30);
@@ -457,18 +536,20 @@ public class GamePanel_CoGanh extends JPanel {
         if (start) {
             if (board_paint != null)
                 g2.drawImage(board_paint, 50, 0, this);
-        } else if (gc != null) {
-            if (gc.huongDan) {
-                g2.setColor(Color.white);
-                if (hdImg != null)
-                    g2.drawImage(hdImg, 100, 30, 800, 540, this);
-                if (right != null)
-                    g2.drawImage(right, 810, 490, 50, 50, this);
-                if (left != null)
-                    g2.drawImage(left, 750, 490, 50, 50, this);
-                if (back != null)
-                    g2.drawImage(back, 15, 30, 50, 50, this);
-            }
+        }
+
+        if (gc != null && gc.huongDan) {
+            g2.setColor(Color.white);
+            if (hdImg != null)
+                g2.drawImage(hdImg, 100, 30, 800, 540, this);
+            if (right != null)
+                g2.drawImage(right, 810, 490, 50, 50, this);
+            if (left != null)
+                g2.drawImage(left, 750, 490, 50, 50, this);
+            if (back != null)
+                g2.drawImage(back, 15, 30, 50, 50, this);
+        } else if (gc != null && gc.xemLichSu) {
+            veBangLichSu(g2);
         }
 
         if (gc != null && !gc.huongDan) {

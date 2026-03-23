@@ -171,7 +171,7 @@ public class GameController {
         }
     }
 
-    private void kiemTraVaVaoGame(boolean cheDoPvE) {
+    public void kiemTraVaVaoGame(boolean cheDoPvE) {
         UIManager.put("Button.focus", new Color(0, 0, 0, 0));
         String fileKiemTra = cheDoPvE ? SAVE_PVE : SAVE_PVP;
         File f = new File(fileKiemTra);
@@ -499,6 +499,8 @@ public class GameController {
     void xuLyChuot(int x, int y) {
         if (isAnimating)
             return;
+
+        // 1. Click vào Sound
         if (!huongDan && !xemLichSu && new Rectangle(940, 520, 50, 50).contains(x, y)) {
             gp.soundOn = !gp.soundOn;
             if (!gp.soundOn)
@@ -506,127 +508,115 @@ public class GameController {
             else
                 gp.music.batDau();
             gp.repaint();
-        } else {
-            if (gp.start) {
-                if (new Rectangle(890, 15, 100, 40).contains(x, y)) {
-                    if (end == 0)
-                        saveGame();
-                    else
-                        deleteCurrentSaveFile();
-                    gp.resetGame();
-                    return;
-                }
+            return;
+        }
 
-                if (isPvE && end == 0) {
-                    if (y >= 440 && y <= 510) {
-                        if (x >= 680 && x <= 740) {
-                            goiYNuocDi();
-                            return;
-                        } else if (x >= 755 && x <= 845) {
-                            undoMove();
-                            return;
-                        }
+        // 2. Xử lý khi đang xem Hướng dẫn
+        if (huongDan) {
+            if (new Rectangle(810, 490, 50, 50).contains(x, y)) {
+                if (trangHD < 2)
+                    trangHD++;
+                if (gp.hd[trangHD] != null)
+                    gp.hdImg = gp.hd[trangHD];
+                gp.repaint();
+            } else if (new Rectangle(750, 490, 50, 50).contains(x, y)) {
+                if (trangHD > 0)
+                    trangHD--;
+                if (gp.hd[trangHD] != null)
+                    gp.hdImg = gp.hd[trangHD];
+                gp.repaint();
+            } else if (new Rectangle(15, 30, 50, 50).contains(x, y)) {
+                huongDan = false;
+                if (!gp.start) gp.veMenu(); else gp.repaint();
+            }
+            return;
+        }
+
+        // 3. Xử lý khi đang xem Lịch sử
+        if (xemLichSu) {
+            if (new Rectangle(60, 30, 50, 50).contains(x, y)) {
+                xemLichSu = false;
+                trangLS = 0;
+                if (!gp.start) gp.veMenu(); else gp.repaint();
+            } else if (trangLS == 1 && new Rectangle(380, 485, 40, 40).contains(x, y)) {
+                trangLS = 0;
+                if (!gp.start) gp.veMenu(); else gp.repaint();
+            } else if (trangLS == 0 && new Rectangle(580, 485, 40, 40).contains(x, y)) {
+                trangLS = 1;
+                if (!gp.start) gp.veMenu(); else gp.repaint();
+            }
+            return;
+        }
+
+        // 4. Xử lý khi đang trong ván chơi
+        if (gp.start) {
+            if (new Rectangle(890, 15, 100, 40).contains(x, y)) {
+                if (end == 0)
+                    saveGame();
+                else
+                    deleteCurrentSaveFile();
+                gp.resetGame();
+                return;
+            }
+
+            if (isPvE && end == 0) {
+                if (y >= 440 && y <= 510) {
+                    if (x >= 680 && x <= 740) {
+                        goiYNuocDi();
+                        return;
+                    } else if (x >= 755 && x <= 845) {
+                        undoMove();
+                        return;
                     }
                 }
+            }
 
-                if (end == 0) {
-                    if (isPvE && !chonBlue)
-                        return;
-                    if (chuMo && new Rectangle(720, 265, 60, 40).contains(x, y)) {
-                        if (!moCo) {
-                            moCo = true;
-                            setMoCo();
-                        } else {
-                            moCo = false;
-                            int i = oDaChon / 10, j = oDaChon % 10;
-                            if (chonBlue)
-                                board[i][j][2] = 1;
-                            else
-                                board[i][j][2] = -1;
-                            chonO(i, j, true);
-                        }
+            if (end == 0) {
+                if (isPvE && !chonBlue)
+                    return;
+                if (chuMo && new Rectangle(720, 265, 60, 40).contains(x, y)) {
+                    if (!moCo) {
+                        moCo = true;
+                        setMoCo();
                     } else {
-                        int j = (x - 85) / 125, i = (y - 35) / 125;
-                        if (i < 5 && j < 5) {
-                            Ellipse2D elip = new Ellipse2D.Float(board[i][j][0], board[i][j][1], 30, 30);
-                            if (elip.contains(x - 50, y)) {
-                                if (!moCo)
-                                    chonO(i, j, true);
-                                else
-                                    chonOSauKhiMoCo(i, j, board[i][j][2]);
-                            }
-                        }
+                        moCo = false;
+                        int i = oDaChon / 10, j = oDaChon % 10;
+                        if (chonBlue)
+                            board[i][j][2] = 1;
+                        else
+                            board[i][j][2] = -1;
+                        chonO(i, j, true);
                     }
                 } else {
-                    if (new Rectangle(180, 290, 240, 80).contains(x, y)) {
-                        deleteCurrentSaveFile();
-                        choiLaiVanMoi();
+                    int j = (x - 85) / 125, i = (y - 35) / 125;
+                    if (i < 5 && j < 5) {
+                        Ellipse2D elip = new Ellipse2D.Float(board[i][j][0], board[i][j][1], 30, 30);
+                        if (elip.contains(x - 50, y)) {
+                            if (!moCo)
+                                chonO(i, j, true);
+                            else
+                                chonOSauKhiMoCo(i, j, board[i][j][2]);
+                        }
                     }
                 }
             } else {
-                if (dangChonDoKho) {
-                    if (new Rectangle(40, 20, 300, 50).contains(x, y)) {
-                        doKhoAI = 1;
-                        dangChonDoKho = false;
-                        kiemTraVaVaoGame(true);
-                    } else if (new Rectangle(40, 90, 300, 50).contains(x, y)) {
-                        doKhoAI = 2;
-                        dangChonDoKho = false;
-                        kiemTraVaVaoGame(true);
-                    } else if (new Rectangle(40, 160, 240, 50).contains(x, y)) {
-                        doKhoAI = 4;
-                        dangChonDoKho = false;
-                        kiemTraVaVaoGame(true);
-                    } else if (new Rectangle(40, 230, 240, 50).contains(x, y)) {
-                        dangChonDoKho = false;
-                        gp.veMenu();
-                    }
-                } else if (!huongDan && !xemLichSu) {
-                    if (new Rectangle(40, 20, 300, 50).contains(x, y))
-                        kiemTraVaVaoGame(false);
-                    else if (new Rectangle(40, 90, 300, 50).contains(x, y)) {
-                        dangChonDoKho = true;
-                        gp.veMenu();
-                    } else if (new Rectangle(40, 160, 240, 50).contains(x, y)) {
-                        if (gp.hd[0] != null)
-                            gp.hdImg = gp.hd[0];
-                        huongDan = true;
-                        gp.veMenu();
-                    } else if (new Rectangle(40, 230, 240, 50).contains(x, y)) {
-                        xemLichSu = true;
-                        trangLS = 0;
-                        cuonLichSu = 0;
-                        gp.veMenu();
-                    }
-                } else if (huongDan) {
-                    if (new Rectangle(810, 490, 50, 50).contains(x, y)) {
-                        if (trangHD < 2)
-                            trangHD++;
-                        if (gp.hd[trangHD] != null)
-                            gp.hdImg = gp.hd[trangHD];
-                        gp.repaint();
-                    } else if (new Rectangle(750, 490, 50, 50).contains(x, y)) {
-                        if (trangHD > 0)
-                            trangHD--;
-                        if (gp.hd[trangHD] != null)
-                            gp.hdImg = gp.hd[trangHD];
-                        gp.repaint();
-                    } else if (new Rectangle(15, 30, 50, 50).contains(x, y)) {
-                        huongDan = false;
-                        gp.veMenu();
-                    }
-                } else if (xemLichSu) {
-                    if (new Rectangle(60, 30, 50, 50).contains(x, y)) {
-                        xemLichSu = false;
-                        trangLS = 0;
-                        gp.veMenu();
-                    } else if (trangLS == 1 && new Rectangle(380, 485, 40, 40).contains(x, y)) {
-                        trangLS = 0;
-                        gp.veMenu();
-                    } else if (trangLS == 0 && new Rectangle(580, 485, 40, 40).contains(x, y)) {
-                        trangLS = 1;
-                        gp.veMenu();
-                    }
+                if (new Rectangle(180, 290, 240, 80).contains(x, y)) {
+                    deleteCurrentSaveFile();
+                    choiLaiVanMoi();
+                }
+            }
+        } else {
+            // Xử lý tại Menu chính (không vẽ chữ nhưng vẫn nhận diện click nếu cần)
+            if (dangChonDoKho) {
+                // ... (có thể lược bỏ vì dùng MenuBar)
+                if (new Rectangle(40, 20, 300, 50).contains(x, y)) {
+                    doKhoAI = 1; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                } else if (new Rectangle(40, 90, 300, 50).contains(x, y)) {
+                    doKhoAI = 2; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                } else if (new Rectangle(40, 160, 240, 50).contains(x, y)) {
+                    doKhoAI = 4; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                } else if (new Rectangle(40, 230, 240, 50).contains(x, y)) {
+                    dangChonDoKho = false; gp.veMenu();
                 }
             }
         }

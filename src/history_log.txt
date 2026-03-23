@@ -1,8 +1,0 @@
-DO|PvE
-DO|PvP
-DO|PvE
-XANH|PvP
-DO|PvE
-XANH|PvE
-DO|PvE
-DO|PvE

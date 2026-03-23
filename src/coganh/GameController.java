@@ -566,7 +566,7 @@ public class GameController {
 
         // 4. Xử lý khi đang trong ván chơi
         if (gp.start) {
-            if (new Rectangle(890, 15, 100, 40).contains(x, y)) {
+            if (new Rectangle(895, 20, 100, 50).contains(x, y)) {
                 if (end == 0)
                     saveGame();
                 else

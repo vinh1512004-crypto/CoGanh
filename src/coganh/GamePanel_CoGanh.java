@@ -435,29 +435,9 @@ public class GamePanel_CoGanh extends JPanel {
                 g.drawString(String.valueOf(luotConLai), undoX + iconSize - 2, iconY + 10);
             }
 
-            if (!gc.isPvE) {
-                // Draw Timers Backgrounds
-                g.setColor(new Color(147, 112, 219, 200));
-                g.fillRoundRect(735, 75, 80, 35, 15, 15);
-                g.fillRoundRect(735, 475, 80, 35, 15, 15);
-
-                g.setFont(new Font("Arial", Font.BOLD, 22));
-
-                // Red Timer (Top)
-                int minRed = gc.timeLeftRed / 60;
-                int secRed = gc.timeLeftRed % 60;
-                String timeStrRed = String.format("%02d:%02d", minRed, secRed);
-                g.setColor(gc.timeLeftRed <= 60 ? Color.RED : Color.WHITE);
-                g.drawString("" + timeStrRed, 745, 100);
-
-                // Blue Timer (Bottom)
-                int minBlue = gc.timeLeftBlue / 60;
-                int secBlue = gc.timeLeftBlue % 60;
-                String timeStrBlue = String.format("%02d:%02d", minBlue, secBlue);
-                g.setColor(gc.timeLeftBlue <= 60 ? Color.RED : Color.WHITE);
-                g.drawString("" + timeStrBlue, 745, 500);
+            if (gc.xemLichSu) {
+                veBangLichSu(g);
             }
-
             g.dispose();
         }
 
@@ -535,7 +515,6 @@ public class GamePanel_CoGanh extends JPanel {
         double scaleX = (double) w / 1000;
         double scaleY = (double) h / 600;
 
-        // Áp dụng tỷ lệ co giãn cho toàn bộ Graphics context
         g2.scale(scaleX, scaleY);
 
         if (background_paint != null)

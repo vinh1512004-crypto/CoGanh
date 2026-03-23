@@ -496,9 +496,13 @@ public class GameController {
         }
     }
 
-    void xuLyChuot(int x, int y) {
+    void xuLyChuot(int x_in, int y_in) {
         if (isAnimating)
             return;
+
+        // Tỷ lệ co giãn dựa trên SCREEN_WIDTH (1000) và SCREEN_HEIGHT (600)
+        int x = (int) (x_in * (1000.0 / gp.getWidth()));
+        int y = (int) (y_in * (600.0 / gp.getHeight()));
 
         // 1. Click vào Sound
         if (!huongDan && !xemLichSu && new Rectangle(940, 520, 50, 50).contains(x, y)) {

@@ -535,45 +535,40 @@ public class GamePanel_CoGanh extends JPanel {
         double scaleX = (double) w / 1000;
         double scaleY = (double) h / 600;
 
+        // Áp dụng tỷ lệ co giãn cho toàn bộ Graphics context
+        g2.scale(scaleX, scaleY);
+
         if (background_paint != null)
-            g2.drawImage(background_paint, 0, 0, w, h, this);
+            g2.drawImage(background_paint, 0, 0, 1000, 600, this);
 
         if (start) {
             if (board_paint != null) {
-                int boardX = (int) (50 * scaleX);
-                int boardW = (int) (board_paint.getWidth() * scaleX);
-                int boardH = (int) (board_paint.getHeight() * scaleY);
-                g2.drawImage(board_paint, boardX, 0, boardW, boardH, this);
+                // Tọa độ gốc trong hệ 1000x600
+                g2.drawImage(board_paint, 50, 0, this);
             }
         }
 
         if (gc != null && gc.huongDan) {
             g2.setColor(Color.white);
             if (hdImg != null)
-                g2.drawImage(hdImg, (int)(100 * scaleX), (int)(30 * scaleY), (int)(800 * scaleX), (int)(540 * scaleY), this);
+                g2.drawImage(hdImg, 100, 30, 800, 540, this);
             if (right != null)
-                g2.drawImage(right, (int)(810 * scaleX), (int)(490 * scaleY), (int)(50 * scaleX), (int)(50 * scaleY), this);
+                g2.drawImage(right, 810, 490, 50, 50, this);
             if (left != null)
-                g2.drawImage(left, (int)(750 * scaleX), (int)(490 * scaleY), (int)(50 * scaleX), (int)(50 * scaleY), this);
+                g2.drawImage(left, 750, 490, 50, 50, this);
             if (back != null)
-                g2.drawImage(back, (int)(15 * scaleX), (int)(30 * scaleY), (int)(50 * scaleX), (int)(50 * scaleY), this);
+                g2.drawImage(back, 15, 30, 50, 50, this);
         } else if (gc != null && gc.xemLichSu) {
-            // Note: veBangLichSu is more complex as it draws text and primitives.
-            // However, it draws into 'g' (which is g2 here). 
-            // We need to apply scaling to the Graphics2D context itself for veBangLichSu.
-            Graphics2D gScale = (Graphics2D) g2.create();
-            gScale.scale(scaleX, scaleY);
-            veBangLichSu(gScale);
-            gScale.dispose();
+            veBangLichSu(g2);
         }
 
         if (gc != null && !gc.huongDan) {
             if (this.soundOn) {
                 if (on != null)
-                    g2.drawImage(on, (int)(940 * scaleX), (int)(520 * scaleY), (int)(50 * scaleX), (int)(50 * scaleY), this);
+                    g2.drawImage(on, 940, 520, 50, 50, this);
             } else {
                 if (off != null)
-                    g2.drawImage(off, (int)(940 * scaleX), (int)(520 * scaleY), (int)(50 * scaleX), (int)(50 * scaleY), null);
+                    g2.drawImage(off, 940, 520, 50, 50, null);
             }
         }
         g2.dispose();

@@ -531,7 +531,10 @@ public class GameController {
                 gp.repaint();
             } else if (new Rectangle(15, 30, 50, 50).contains(x, y)) {
                 huongDan = false;
-                if (!gp.start) gp.veMenu(); else gp.repaint();
+                if (!gp.start)
+                    gp.veMenu();
+                else
+                    gp.repaint();
             }
             return;
         }
@@ -541,13 +544,22 @@ public class GameController {
             if (new Rectangle(60, 30, 50, 50).contains(x, y)) {
                 xemLichSu = false;
                 trangLS = 0;
-                if (!gp.start) gp.veMenu(); else gp.repaint();
+                if (!gp.start)
+                    gp.veMenu();
+                else
+                    gp.repaint();
             } else if (trangLS == 1 && new Rectangle(380, 485, 40, 40).contains(x, y)) {
                 trangLS = 0;
-                if (!gp.start) gp.veMenu(); else gp.repaint();
+                if (!gp.start)
+                    gp.veMenu();
+                else
+                    gp.repaint();
             } else if (trangLS == 0 && new Rectangle(580, 485, 40, 40).contains(x, y)) {
                 trangLS = 1;
-                if (!gp.start) gp.veMenu(); else gp.repaint();
+                if (!gp.start)
+                    gp.veMenu();
+                else
+                    gp.repaint();
             }
             return;
         }
@@ -564,11 +576,13 @@ public class GameController {
             }
 
             if (isPvE && end == 0) {
+                // KIỂM TRA CLICK CÁC NÚT PVE VỚI TOẠ ĐỘ VÙNG CLICK ĐÃ ĐƯỢC CHỈNH CHUẨN XÁC
                 if (y >= 440 && y <= 510) {
-                    if (x >= 680 && x <= 740) {
+                    if (x >= 740 && x <= 780) {
                         goiYNuocDi();
                         return;
-                    } else if (x >= 755 && x <= 845) {
+                    }
+                    else if (x >= 800 && x <= 860) {
                         undoMove();
                         return;
                     }
@@ -614,13 +628,20 @@ public class GameController {
             if (dangChonDoKho) {
                 // ... (có thể lược bỏ vì dùng MenuBar)
                 if (new Rectangle(40, 20, 300, 50).contains(x, y)) {
-                    doKhoAI = 1; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                    doKhoAI = 1;
+                    dangChonDoKho = false;
+                    kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 90, 300, 50).contains(x, y)) {
-                    doKhoAI = 2; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                    doKhoAI = 2;
+                    dangChonDoKho = false;
+                    kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 160, 240, 50).contains(x, y)) {
-                    doKhoAI = 4; dangChonDoKho = false; kiemTraVaVaoGame(true);
+                    doKhoAI = 4;
+                    dangChonDoKho = false;
+                    kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 230, 240, 50).contains(x, y)) {
-                    dangChonDoKho = false; gp.veMenu();
+                    dangChonDoKho = false;
+                    gp.veMenu();
                 }
             }
         }

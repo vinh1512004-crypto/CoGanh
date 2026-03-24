@@ -67,7 +67,7 @@ public class GamePanel_CoGanh extends JPanel {
         menuBar.setBorderPainted(false);
 
         Color menuTextColor = Color.WHITE;
-        Font menuFont = new Font("Arial", Font.BOLD, 14);
+        Font menuFont = new Font("Times New Roman", Font.BOLD, 14);
 
         // --- Menu THỂ LOẠI (PvP & PvE) ---
         categoryMenu = new JMenu("Thể loại");
@@ -171,7 +171,7 @@ public class GamePanel_CoGanh extends JPanel {
         try {
             back = ImageIO.read(getClass().getResourceAsStream("back.png"));
             background = ImageIO.read(getClass().getResourceAsStream("br_coganh.jpg"));
-            boardImg = ImageIO.read(getClass().getResourceAsStream("board.jpg"));
+            boardImg = ImageIO.read(getClass().getResourceAsStream("board.png"));
             backgr = ImageIO.read(getClass().getResourceAsStream("brg.png"));
             on = ImageIO.read(getClass().getResourceAsStream("on.png"));
             off = ImageIO.read(getClass().getResourceAsStream("off.png"));
@@ -242,7 +242,7 @@ public class GamePanel_CoGanh extends JPanel {
             int title1Width = g.getFontMetrics().stringWidth(title1);
             g.drawString(title1, 500 - (title1Width / 2), 70);
 
-            g.setFont(new Font("Arial", Font.BOLD, 22));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
             g.setColor(Color.LIGHT_GRAY);
             g.drawString("Ván", 200, 130);
             g.drawString("Chế độ", 450, 130);
@@ -250,7 +250,7 @@ public class GamePanel_CoGanh extends JPanel {
 
             // 1. LẤY TOÀN BỘ LỊCH SỬ THAY VÌ 12 VÁN
             ArrayList<String> recent = gc.sm.getRecentHistory(gc.sm.getTotalGames());
-            g.setFont(new Font("Arial", Font.PLAIN, 22));
+            g.setFont(new Font("Times New Roman", Font.PLAIN, 22));
             int total = gc.sm.getTotalGames();
 
             // 2. TRỪ ĐI ĐỘ CUỘN (Scroll Offset)
@@ -312,7 +312,7 @@ public class GamePanel_CoGanh extends JPanel {
             g.drawString(String.format("MÁY THẮNG: %d ván (%.1f%%)", redPvE, redRate), 150, 300);
 
             int barX = 150, barY = 360, barWidth = 700, barHeight = 45;
-            g.setFont(new Font("Arial", Font.BOLD, 22));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
             if (totalPvE > 0) {
                 int blueWidth = (int) (barWidth * ((float) bluePvE / totalPvE));
                 int redWidth = barWidth - blueWidth;
@@ -362,7 +362,7 @@ public class GamePanel_CoGanh extends JPanel {
             Graphics g = g_bg; // Sử dụng graphics của background_paint luôn
             g.setColor(Color.BLACK);
             g.setFont(new Font("Times New Roman", Font.BOLD, 30));
-            g.drawString("Menu", 895, 50);
+            g.drawString("Back", 895, 50);
 
             g.setColor(new Color(147, 112, 219));
             g.fillRoundRect(730, 20, 130, 50, 30, 30);
@@ -372,6 +372,30 @@ public class GamePanel_CoGanh extends JPanel {
             g.setFont(new Font("Times New Roman", Font.BOLD, 40));
             g.drawString(gc.quanDo.size() + "", 755, 58);
             g.drawString(gc.quanXanh.size() + "", 755, 558);
+
+            // Hiển thị đồng hồ đếm ngược PvP
+            if (!gc.isPvE) {
+                int minRed = gc.timeLeftRed / 60;
+                int secRed = gc.timeLeftRed % 60;
+                int minBlue = gc.timeLeftBlue / 60;
+                int secBlue = gc.timeLeftBlue % 60;
+                String timeRedStr = String.format("%02d:%02d", minRed, secRed);
+                String timeBlueStr = String.format("%02d:%02d", minBlue, secBlue);
+
+                // Khung chứa đồng hồ quân Đỏ (trên)
+                g.setColor(new Color(147, 112, 219));
+                g.fillRoundRect(730, 75, 130, 35, 30, 30);
+                g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+                g.setColor(gc.timeLeftRed <= 30 ? Color.RED : Color.WHITE);
+                g.drawString(timeRedStr, 760, 99);
+
+                // Khung chứa đồng hồ quân Xanh (dưới)
+                g.setColor(new Color(147, 112, 219));
+                g.fillRoundRect(730, 480, 130, 35, 30, 30);
+                g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+                g.setColor(gc.timeLeftBlue <= 30 ? Color.CYAN : Color.WHITE);
+                g.drawString(timeBlueStr, 760, 504);
+            }
 
             g.setColor(Color.yellow);
             if (!gc.chonBlue)
@@ -412,7 +436,7 @@ public class GamePanel_CoGanh extends JPanel {
                 } else {
                     g.setColor(Color.RED);
                 }
-                g.setFont(new Font("Arial", Font.BOLD, 15));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 15));
                 // Vẽ số ở góc trên bên phải icon bóng đèn
                 g.drawString(String.valueOf(helpLeft), hoTroX + iconSize - 2, iconY + 10);
 
@@ -431,7 +455,7 @@ public class GamePanel_CoGanh extends JPanel {
                 } else {
                     g.setColor(Color.RED);
                 }
-                g.setFont(new Font("Arial", Font.BOLD, 15));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 15));
                 g.drawString(String.valueOf(luotConLai), undoX + iconSize - 2, iconY + 10);
             }
 

@@ -67,7 +67,7 @@ public class GamePanel_CoGanh extends JPanel {
         menuBar.setBorderPainted(false);
 
         Color menuTextColor = Color.WHITE;
-        Font menuFont = new Font("Times New Roman", Font.BOLD, 14);
+        Font menuFont = new Font("Times New Roman", Font.BOLD, 16);
 
         // --- Menu THỂ LOẠI (PvP & PvE) ---
         categoryMenu = new JMenu("Thể loại");
@@ -144,7 +144,7 @@ public class GamePanel_CoGanh extends JPanel {
         mainFrame.add(this, BorderLayout.CENTER);
 
         // Không cần tăng chiều cao frame nhiều vì setJMenuBar không chiếm chỗ trong content pane
-        mainFrame.setSize(SCREEN_WIDTH + 15, SCREEN_HEIGHT + 37 + 25);
+       mainFrame.setSize(SCREEN_WIDTH + 15, SCREEN_HEIGHT + 45 + menuBar.getPreferredSize().height);
         
         this.repaint();
         mainFrame.setLocationRelativeTo(null);
@@ -170,7 +170,7 @@ public class GamePanel_CoGanh extends JPanel {
     private void loadImage() {
         try {
             back = ImageIO.read(getClass().getResourceAsStream("back.png"));
-            background = ImageIO.read(getClass().getResourceAsStream("br_coganh.jpg"));
+            background = ImageIO.read(getClass().getResourceAsStream("br_coganh.png"));
             boardImg = ImageIO.read(getClass().getResourceAsStream("board.png"));
             backgr = ImageIO.read(getClass().getResourceAsStream("brg.png"));
             on = ImageIO.read(getClass().getResourceAsStream("on.png"));

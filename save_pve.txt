@@ -1,7 +1,7 @@
  TRANGTHAI 
 true true false false false false false false
  BIENSO 
-0 -1 0 2 1 600 600
+0 -1 0 2 0 600 600
  BANCO 
 -1 -1 -1 -1 -1 
 -1  0  0  0 -1 

@@ -1,3 +1,6 @@
 DO|PvP
 XANH|PvP
 DO|PvP
+DO|PvE
+XANH|PvE
+DO|PvE

@@ -186,6 +186,9 @@ public class GameController {
                 isPvE = cheDoPvE;
                 if (loadGame(cheDoPvE)) {
                     gp.start = true;
+                    if (gp.menuBar != null) {
+                        gp.menuBar.setVisible(false);
+                    }
                     khoiTaoTimer();
                     if (isPvE) {
                         historyStack.clear();
@@ -215,6 +218,9 @@ public class GameController {
     private void taoVanMoi(boolean cheDoPvE) {
         isPvE = cheDoPvE;
         gp.start = true;
+        if (gp.menuBar != null) {
+            gp.menuBar.setVisible(false);
+        }
         khoiTao();
         gp.veLaiToanBo();
     }
@@ -578,11 +584,11 @@ public class GameController {
             if (isPvE && end == 0) {
                 // KIỂM TRA CLICK CÁC NÚT PVE VỚI TOẠ ĐỘ VÙNG CLICK ĐÃ ĐƯỢC CHỈNH CHUẨN XÁC
                 if (y >= 440 && y <= 510) {
-                    if (x >= 740 && x <= 780) {
+                    if (x >= 680 && x <= 720) {
                         goiYNuocDi();
                         return;
                     }
-                    else if (x >= 800 && x <= 860) {
+                    else if (x >= 740 && x <= 800) {
                         undoMove();
                         return;
                     }
@@ -592,7 +598,7 @@ public class GameController {
             if (end == 0) {
                 if (isPvE && !chonBlue)
                     return;
-                if (chuMo && new Rectangle(760, 260, 80, 50).contains(x, y)) {
+                if (chuMo && new Rectangle(700, 260, 80, 50).contains(x, y)) {
                     if (!moCo) {
                         moCo = true;
                         setMoCo();

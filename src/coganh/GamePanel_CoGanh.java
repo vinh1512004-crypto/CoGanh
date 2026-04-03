@@ -81,10 +81,37 @@ public class GamePanel_CoGanh extends JPanel {
         JMenuItem pveMedItem = new JMenuItem("Medium");
         JMenuItem pveHardItem = new JMenuItem("Hard");
 
-        pvpItem.addActionListener(e -> gc.kiemTraVaVaoGame(false));
-        pveEasyItem.addActionListener(e -> { gc.doKhoAI = 1; gc.kiemTraVaVaoGame(true); });
-        pveMedItem.addActionListener(e -> { gc.doKhoAI = 2; gc.kiemTraVaVaoGame(true); });
-        pveHardItem.addActionListener(e -> { gc.doKhoAI = 4; gc.kiemTraVaVaoGame(true); });
+        pvpItem.addActionListener(e -> {
+            if (gc != null && (gc.xemLichSu || gc.huongDan)) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            gc.kiemTraVaVaoGame(false);
+        });
+        pveEasyItem.addActionListener(e -> { 
+            if (gc != null && (gc.xemLichSu || gc.huongDan)) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            gc.doKhoAI = 1; 
+            gc.kiemTraVaVaoGame(true); 
+        });
+        pveMedItem.addActionListener(e -> { 
+            if (gc != null && (gc.xemLichSu || gc.huongDan)) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            gc.doKhoAI = 2; 
+            gc.kiemTraVaVaoGame(true); 
+        });
+        pveHardItem.addActionListener(e -> { 
+            if (gc != null && (gc.xemLichSu || gc.huongDan)) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            gc.doKhoAI = 4; 
+            gc.kiemTraVaVaoGame(true); 
+        });
 
         pveSubMenu.add(pveEasyItem);
         pveSubMenu.add(pveMedItem);
@@ -104,11 +131,26 @@ public class GamePanel_CoGanh extends JPanel {
         JMenuItem hintItem = new JMenuItem("Gợi ý (Hint)");
 
         hdItem.addActionListener(e -> { 
+            if (gc != null && gc.xemLichSu) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             if (hd[0] != null) hdImg = hd[0];
-            gc.huongDan = true; 
+            if (gc != null) gc.huongDan = true; 
             veMenu(); 
         });
-        lsItem.addActionListener(e -> { gc.xemLichSu = true; gc.trangLS = 0; gc.cuonLichSu = 0; veMenu(); });
+        lsItem.addActionListener(e -> { 
+            if (gc != null && gc.huongDan) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng thoát ra trước khi chọn cái khác.", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (gc != null) {
+                gc.xemLichSu = true; 
+                gc.trangLS = 0; 
+                gc.cuonLichSu = 0; 
+            }
+            veMenu(); 
+        });
         undoItem.addActionListener(e -> gc.undoMove());
         hintItem.addActionListener(e -> gc.goiYNuocDi());
 
@@ -365,13 +407,13 @@ public class GamePanel_CoGanh extends JPanel {
             g.drawString("Back", 895, 50);
 
             g.setColor(new Color(147, 112, 219));
-            g.fillRoundRect(730, 20, 130, 50, 30, 30);
-            g.fillRoundRect(730, 520, 130, 50, 30, 30);
+            g.fillRoundRect(670, 20, 130, 50, 30, 30);
+            g.fillRoundRect(670, 520, 130, 50, 30, 30);
 
             g.setColor(Color.WHITE);
             g.setFont(new Font("Times New Roman", Font.BOLD, 40));
-            g.drawString(gc.quanDo.size() + "", 755, 58);
-            g.drawString(gc.quanXanh.size() + "", 755, 558);
+            g.drawString(gc.quanDo.size() + "", 695, 58);
+            g.drawString(gc.quanXanh.size() + "", 695, 558);
 
             // Hiển thị đồng hồ đếm ngược PvP
             if (!gc.isPvE) {
@@ -384,35 +426,36 @@ public class GamePanel_CoGanh extends JPanel {
 
                 // Khung chứa đồng hồ quân Đỏ (trên)
                 g.setColor(new Color(147, 112, 219));
-                g.fillRoundRect(730, 75, 130, 35, 30, 30);
+                g.fillRoundRect(670, 75, 130, 35, 30, 30);
                 g.setFont(new Font("Times New Roman", Font.BOLD, 22));
                 g.setColor(gc.timeLeftRed <= 30 ? Color.RED : Color.WHITE);
-                g.drawString(timeRedStr, 760, 99);
+                g.drawString(timeRedStr, 700, 99);
 
                 // Khung chứa đồng hồ quân Xanh (dưới)
                 g.setColor(new Color(147, 112, 219));
-                g.fillRoundRect(730, 480, 130, 35, 30, 30);
+                g.fillRoundRect(670, 480, 130, 35, 30, 30);
                 g.setFont(new Font("Times New Roman", Font.BOLD, 22));
                 g.setColor(gc.timeLeftBlue <= 30 ? Color.CYAN : Color.WHITE);
-                g.drawString(timeBlueStr, 760, 504);
+                g.drawString(timeBlueStr, 700, 504);
             }
 
             g.setColor(Color.yellow);
             if (!gc.chonBlue)
-                g.fillOval(810, 30, 30, 30);
+                g.fillOval(750, 30, 30, 30);
             else
-                g.fillOval(810, 530, 30, 30);
+                g.fillOval(750, 530, 30, 30);
 
             if (gc.chuMo) {
+                g.setFont(new Font("Times New Roman", Font.BOLD, 30));
                 if (!gc.moCo)
                     g.setColor(Color.BLACK);
                 else
                     g.setColor(Color.pink);
-                g.drawString("Mở", 780, 300);
+                g.drawString("Mở", 720, 300);
             }
 
             if (gc.isPvE && gc.end == 0) {
-                int boxX = 730;
+                int boxX = 670;
                 int boxY = 450;
                 int boxW = 130;
                 int boxH = 50;
@@ -426,7 +469,7 @@ public class GamePanel_CoGanh extends JPanel {
                 int iconY = boxY + (boxH - iconSize) / 2; // Căn giữa theo chiều dọc
 
                 // --- VẼ NÚT HỖ TRỢ (BÓNG ĐÈN) BÊN TRÁI ---
-                int hoTroX = 744; // Căn chính giữa của nửa ô bên trái
+                int hoTroX = 684; // Căn chính giữa của nửa ô bên trái
                 if (hoTroIcon != null) {
                     g.drawImage(hoTroIcon, hoTroX, iconY, iconSize, iconSize, null);
                 }
@@ -441,7 +484,7 @@ public class GamePanel_CoGanh extends JPanel {
                 g.drawString(String.valueOf(helpLeft), hoTroX + iconSize - 2, iconY + 10);
 
                 // --- VẼ NÚT ĐI LẠI (UNDO) BÊN PHẢI ---
-                int undoX = 805; // Căn chính giữa của nửa ô bên phải
+                int undoX = 745; // Căn chính giữa của nửa ô bên phải
                 if (undoIcon != null) {
                     g.drawImage(undoIcon, undoX, iconY, iconSize, iconSize, null);
                 } else if (back != null) {
@@ -541,8 +584,24 @@ public class GamePanel_CoGanh extends JPanel {
 
         g2.scale(scaleX, scaleY);
 
-        if (background_paint != null)
+        if (background_paint != null) {
             g2.drawImage(background_paint, 0, 0, 1000, 600, this);
+        } else {
+            // NẾU CHƯA CÓ ẢNH NỀN, VẼ GRADIENT GỖ SANG TRỌNG
+            // Màu nâu đậm ở dưới và nâu sáng hơn ở trên
+            Color color1 = new Color(60, 30, 10); // Nâu đen
+            Color color2 = new Color(101, 67, 33); // Nâu gỗ
+            
+            java.awt.GradientPaint gp = new java.awt.GradientPaint(0, 0, color2, 0, getHeight(), color1);
+            g2.setPaint(gp);
+            g2.fillRect(0, 0, 1000, 600);
+            
+            // Thêm một chút hiệu ứng vân sần nhẹ (tùy chọn)
+            g2.setColor(new Color(255, 255, 255, 10)); // Trắng rất mờ
+            for (int i = 0; i < 600; i += 4) {
+                g2.drawLine(0, i, 1000, i);
+            }
+        }
 
         if (start) {
             if (board_paint != null) {
@@ -559,8 +618,9 @@ public class GamePanel_CoGanh extends JPanel {
                 g2.drawImage(right, 810, 490, 50, 50, this);
             if (left != null)
                 g2.drawImage(left, 750, 490, 50, 50, this);
-            if (back != null)
-                g2.drawImage(back, 15, 30, 50, 50, this);
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Times New Roman", Font.BOLD, 30));
+            g2.drawString("Back", 15, 65);
         } else if (gc != null && gc.xemLichSu) {
             veBangLichSu(g2);
         }
@@ -580,6 +640,9 @@ public class GamePanel_CoGanh extends JPanel {
     public void resetGame() {
         this.start = false;
         this.gc = new GameController(this);
+        if (this.menuBar != null) {
+            this.menuBar.setVisible(true);
+        }
         veMenu();
     }
 

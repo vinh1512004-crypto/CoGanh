@@ -126,7 +126,7 @@ public class GamePanel_CoGanh extends JPanel {
         utilityMenu.setFont(menuFont);
 
         JMenuItem hdItem = new JMenuItem("Hướng dẫn");
-        JMenuItem lsItem = new JMenuItem("Xem lịch sử đấu");
+        JMenuItem lsItem = new JMenuItem("Lịch sử đấu");
         JMenuItem undoItem = new JMenuItem("Đi lại (Undo)");
         JMenuItem hintItem = new JMenuItem("Gợi ý (Hint)");
 
@@ -272,9 +272,22 @@ public class GamePanel_CoGanh extends JPanel {
     private void veBangLichSu(Graphics g) {
         if (gc == null)
             return;
-        g.setColor(new Color(0, 0, 0, 220));
-        g.fillRect(50, 20, 900, 550);
-        g.setColor(Color.WHITE);
+        Graphics2D g2 = (Graphics2D) g;
+        // Shadow
+        g2.setColor(new Color(0, 0, 0, 100));
+        g2.fillRoundRect(55, 25, 900, 550, 30, 30);
+
+        // Nền giấy tông ấm
+        g2.setColor(new Color(253, 245, 230, 240));
+        g2.fillRoundRect(50, 20, 900, 550, 30, 30);
+
+        // Viền trang trí
+        g2.setColor(new Color(139, 69, 19));
+        g2.setStroke(new java.awt.BasicStroke(4));
+        g2.drawRoundRect(50, 20, 900, 550, 30, 30);
+        
+        g2.setStroke(new java.awt.BasicStroke(1));
+        g2.setColor(Color.BLACK);
 
         Font fontTieuDe = new Font("Times New Roman", Font.BOLD, 40);
         g.setFont(fontTieuDe);
@@ -282,13 +295,16 @@ public class GamePanel_CoGanh extends JPanel {
         if (gc.trangLS == 0) {
             String title1 = "LỊCH SỬ CÁC VÁN ĐẤU";
             int title1Width = g.getFontMetrics().stringWidth(title1);
+            g.setColor(new Color(139, 69, 19));
             g.drawString(title1, 500 - (title1Width / 2), 70);
+            g.drawLine(500 - (title1Width / 2) - 20, 85, 500 + (title1Width / 2) + 20, 85);
 
             g.setFont(new Font("Times New Roman", Font.BOLD, 22));
-            g.setColor(Color.LIGHT_GRAY);
             g.drawString("Ván", 200, 130);
             g.drawString("Chế độ", 450, 130);
             g.drawString("Kết quả", 700, 130);
+            
+            g.drawLine(150, 145, 850, 145);
 
             // 1. LẤY TOÀN BỘ LỊCH SỬ THAY VÌ 12 VÁN
             ArrayList<String> recent = gc.sm.getRecentHistory(gc.sm.getTotalGames());
@@ -313,14 +329,20 @@ public class GamePanel_CoGanh extends JPanel {
                 // Phân tách logic hiển thị theo chế độ chơi
                 if (mode.equals("PvP")) {
                     winnerText = winnerRaw.equals("XANH") ? "Xanh Win" : "Đỏ Win";
-                    c = winnerRaw.equals("XANH") ? Color.CYAN : Color.RED;
+                    c = winnerRaw.equals("XANH") ? Color.BLUE : Color.RED;
                 } else { // Chế độ PvE
                     winnerText = winnerRaw.equals("XANH") ? "Người thắng" : "Máy thắng";
-                    c = winnerRaw.equals("XANH") ? Color.CYAN : Color.RED;
+                    c = winnerRaw.equals("XANH") ? Color.BLUE : Color.RED;
                 }
-                g.setColor(Color.WHITE);
-                g.drawString("#" + (total - (recent.size() - 1 - i)), 200, y);
-                g.setColor(Color.GREEN);
+                int rowIndex = recent.size() - 1 - i;
+                if (rowIndex % 2 == 0) {
+                    g.setColor(new Color(0, 0, 0, 15)); // Sọc nền nhạt
+                    g.fillRect(150, y - 22, 700, 30);
+                }
+
+                g.setColor(Color.BLACK);
+                g.drawString(String.valueOf(total - rowIndex), 200, y);
+                g.setColor(new Color(0, 150, 0));
                 g.drawString(mode, 450, y);
                 g.setColor(c);
                 g.drawString(winnerText, 700, y);
@@ -330,14 +352,16 @@ public class GamePanel_CoGanh extends JPanel {
             // 4. HỦY VÙNG CẮT (Để vẽ các nút bấm và chữ ở dưới cùng không bị che)
             g.setClip(null);
 
-            g.setColor(Color.YELLOW);
+            g.setColor(new Color(200, 100, 0));
             g.setFont(new Font("Times New Roman", Font.ITALIC, 20));
             g.drawString("Trang 1/2: Lịch sử chung (Lăn chuột để xem thêm)", 300, 550);
 
         } else if (gc.trangLS == 1) {
             String title2 = "THỐNG KÊ PVE";
             int title2Width = g.getFontMetrics().stringWidth(title2);
+            g.setColor(new Color(139, 69, 19));
             g.drawString(title2, 500 - (title2Width / 2), 70);
+            g.drawLine(500 - (title2Width / 2) - 20, 85, 500 + (title2Width / 2) + 20, 85);
 
             int totalPvE = gc.sm.getTotalPvEGames();
             int bluePvE = gc.sm.getPvEBlueWins();
@@ -346,7 +370,7 @@ public class GamePanel_CoGanh extends JPanel {
             float redRate = totalPvE == 0 ? 0 : ((float) redPvE / totalPvE) * 100;
 
             g.setFont(new Font("Times New Roman", Font.PLAIN, 30));
-            g.setColor(Color.CYAN);
+            g.setColor(Color.BLACK);
             g.drawString("Tổng số ván đã chơi: " + totalPvE, 150, 160);
             g.setColor(Color.BLUE);
             g.drawString(String.format("NGƯỜI THẮNG: %d ván (%.1f%%)", bluePvE, blueRate), 150, 230);
@@ -363,7 +387,7 @@ public class GamePanel_CoGanh extends JPanel {
                 g.fillRect(barX, barY, blueWidth, barHeight);
                 g.setColor(new Color(200, 0, 0));
                 g.fillRect(barX + blueWidth, barY, redWidth, barHeight);
-                g.setColor(Color.WHITE);
+                g.setColor(Color.BLACK);
                 g.drawRect(barX, barY, barWidth, barHeight);
 
                 g.setColor(Color.WHITE);
@@ -374,11 +398,11 @@ public class GamePanel_CoGanh extends JPanel {
             } else {
                 g.setColor(Color.DARK_GRAY);
                 g.fillRect(barX, barY, barWidth, barHeight);
-                g.setColor(Color.WHITE);
+                g.setColor(Color.BLACK);
                 g.drawRect(barX, barY, barWidth, barHeight);
                 g.drawString("Chưa có dữ liệu ván đấu", barX + barWidth / 2 - 120, barY + 30);
             }
-            g.setColor(Color.YELLOW);
+            g.setColor(new Color(200, 100, 0));
             g.setFont(new Font("Times New Roman", Font.ITALIC, 20));
             g.drawString("Trang 2/2: Thống kê AI", 400, 550);
         }

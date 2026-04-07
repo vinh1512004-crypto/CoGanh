@@ -53,6 +53,11 @@ public class GameSaveData implements Serializable {
             pw.println(gc.isPvE + " " + gc.chonBlue + " " + gc.chon + " " + gc.check + " " + gc.chuMo + " " + gc.moCo
                     + " " + gc.checkOMo
                     + " " + gc.checkOBiMo);
+            pw.println(" NAMES ");
+            pw.println(gc.playerNameBlue);
+            pw.println(gc.playerNameRed);
+            pw.println(" AVATARS ");
+            pw.println(gc.avatarBlueIndex + " " + gc.avatarRedIndex);
             pw.println(" BIENSO ");
             pw.println(gc.oDaChon + " " + gc.oBatBuoc + " " + gc.undoCount + " " + gc.doKhoAI + " " + gc.helpCount + " "
                     + gc.timeLeftBlue + " " + gc.timeLeftRed);
@@ -104,9 +109,21 @@ public class GameSaveData implements Serializable {
             gc.checkOMo = sc.nextBoolean();
             gc.checkOBiMo = sc.nextBoolean();
 
-            while (sc.hasNextLine())
-                if (sc.nextLine().contains(" BIENSO "))
-                    break;
+            while (sc.hasNextLine()) {
+                String line = sc.nextLine();
+                if (line.contains(" NAMES ")) {
+                    if (sc.hasNextLine()) gc.playerNameBlue = sc.nextLine();
+                    if (sc.hasNextLine()) gc.playerNameRed = sc.nextLine();
+                }
+                if (line.contains(" AVATARS ")) {
+                    if (sc.hasNextInt()) gc.avatarBlueIndex = sc.nextInt();
+                    if (sc.hasNextInt()) gc.avatarRedIndex = sc.nextInt();
+                    if (gc.avatarBlueIndex > 5) gc.avatarBlueIndex = 0;
+                    if (gc.avatarRedIndex > 5) gc.avatarRedIndex = 1;
+                    sc.nextLine(); // consume newline
+                }
+                if (line.contains(" BIENSO ")) break;
+            }
             gc.oDaChon = sc.nextInt();
             gc.oBatBuoc = sc.nextInt();
             if (sc.hasNextInt()) {
@@ -150,6 +167,27 @@ public class GameSaveData implements Serializable {
             gc.listBiMo = loadList(sc.nextLine());
 
             sc.close();
+
+            // Làm sạch các trạng thái tạm thời bị lưu (đang chọn, ô đích, quân bị vây...)
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    int val = gc.board[i][j][2];
+                    if (val == 2)  gc.board[i][j][2] = 1;   // xanh đang chọn -> xanh
+                    if (val == -2) gc.board[i][j][2] = -1;  // đỏ đang chọn  -> đỏ
+                    if (val == 3)  gc.board[i][j][2] = 0;   // ô đích        -> trống
+                    if (val == 4)  gc.board[i][j][2] = (gc.chonBlue ? 1 : -1); // quân bị vây
+                }
+            }
+            // Reset trạng thái đang hành động
+            gc.chon = false;
+            gc.moCo = false;
+            gc.chuMo = false;
+            gc.check = false;
+            gc.checkOMo = false;
+            gc.checkOBiMo = false;
+            gc.oBatBuoc = -1;
+            gc.listMo.clear();
+            gc.listBiMo.clear();
 
             gc.dongBoQuanCo();
 

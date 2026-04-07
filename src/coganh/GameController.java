@@ -19,7 +19,12 @@ public class GameController {
 
     public boolean chonBlue = true, chon, check, chuMo, moCo, checkOMo, checkOBiMo, huongDan, xemLichSu = false,
             isPvE = false;
+    public String playerNameBlue = "Người Xanh";
+    public String playerNameRed = "Người Đỏ";
+    public int avatarBlueIndex = 0;
+    public int avatarRedIndex = 1;
     public int oDaChon, end = 0, oBatBuoc = -1, trangHD = 0, trangLS = 0;
+    public boolean timeoutEnd = false;
 
     public int cuonLichSu = 0;
 
@@ -216,6 +221,61 @@ public class GameController {
     }
 
     private void taoVanMoi(boolean cheDoPvE) {
+        javax.swing.JFrame mainFrame = (javax.swing.JFrame) SwingUtilities.getWindowAncestor(gp);
+
+        // Setup Player 1 (Blue)
+        boolean setupBlue = false;
+        while (!setupBlue) {
+            PlayerSetupDialog dialogBlue = new PlayerSetupDialog(mainFrame, "Lựa chọn quân Xanh", gp.avatars, "Người Xanh", 1, true);
+            dialogBlue.setVisible(true); 
+            if (dialogBlue.isConfirmed()) {
+                playerNameBlue = dialogBlue.getPlayerName();
+                avatarBlueIndex = dialogBlue.getSelectedAvatarIndex();
+                setupBlue = true;
+            } else {
+                int confirm = JOptionPane.showConfirmDialog(gp, "Bạn có chắc chắn muốn thoát không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+        }
+
+        // Setup Player 2 (Red or Bot)
+        boolean setupRed = false;
+        while (!setupRed) {
+            if (!cheDoPvE) {
+                PlayerSetupDialog dialogRed = new PlayerSetupDialog(mainFrame, "Lựa chọn quân Đỏ", gp.avatars, "Người Đỏ", 2, true);
+                dialogRed.setVisible(true);
+                if (dialogRed.isConfirmed()) {
+                    playerNameRed = dialogRed.getPlayerName();
+                    avatarRedIndex = dialogRed.getSelectedAvatarIndex();
+                    setupRed = true;
+                } else {
+                    int confirm = JOptionPane.showConfirmDialog(gp, "Bạn có chắc chắn muốn thoát không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
+            } else {
+                PlayerSetupDialog dialogBot = new PlayerSetupDialog(mainFrame, "Đặt tên cho BotAI", gp.avatars, "Bot", 0, false);
+                dialogBot.setVisible(true);
+                if (dialogBot.isConfirmed()) {
+                    String botName = dialogBot.getPlayerName();
+                    if (!botName.toLowerCase().contains("(ai)")) {
+                        botName += " (AI)";
+                    }
+                    playerNameRed = botName;
+                    avatarRedIndex = dialogBot.getSelectedAvatarIndex();
+                    setupRed = true;
+                } else {
+                    int confirm = JOptionPane.showConfirmDialog(gp, "Bạn có chắc chắn muốn thoát không?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                }
+            }
+        }
+
         isPvE = cheDoPvE;
         gp.start = true;
         if (gp.menuBar != null) {
@@ -314,6 +374,7 @@ public class GameController {
     void khoiTao() {
         timeLeftBlue = 600;
         timeLeftRed = 600;
+        timeoutEnd = false;
         quanDo.clear();
         quanXanh.clear();
         for (int i = 0; i < 5; i++) {
@@ -353,10 +414,9 @@ public class GameController {
                     timeLeftBlue--;
                     if (timeLeftBlue <= 0) {
                         end = -1; // Đỏ thắng
-                        JOptionPane.showMessageDialog(gp, "Hết thời gian! Quân Đỏ Thắng!", "Kết thúc",
-                                JOptionPane.INFORMATION_MESSAGE);
+                        timeoutEnd = true;
                         countdownTimer.stop();
-                        sm.addResult(end == 1 ? "XANH" : "DO", isPvE);
+                        sm.addResult(end == 1 ? "XANH" : "DO", isPvE, end == 1 ? playerNameBlue : playerNameRed);
                         deleteCurrentSaveFile();
                     }
                 } else {
@@ -365,10 +425,9 @@ public class GameController {
                     timeLeftRed--;
                     if (timeLeftRed <= 0) {
                         end = 1; // Xanh thắng
-                        JOptionPane.showMessageDialog(gp, "Hết thời gian! Quân Xanh Thắng!", "Kết thúc",
-                                JOptionPane.INFORMATION_MESSAGE);
+                        timeoutEnd = true;
                         countdownTimer.stop();
-                        sm.addResult(end == 1 ? "XANH" : "DO", isPvE);
+                        sm.addResult(end == 1 ? "XANH" : "DO", isPvE, end == 1 ? playerNameBlue : playerNameRed);
                         deleteCurrentSaveFile();
                     }
                 }
@@ -400,7 +459,7 @@ public class GameController {
         } else {
             System.out.println("CẢNH BÁO: Bot đã hết nước đi hợp lệ! NGƯỜI CHƠI THẮNG!");
             end = 1;
-            sm.addResult("XANH", isPvE);
+            sm.addResult("XANH", isPvE, playerNameBlue);
             deleteCurrentSaveFile();
             gp.veLaiToanBo();
         }
@@ -570,9 +629,14 @@ public class GameController {
             return;
         }
 
+        int xanhPanelX = 20;
+        int doPanelX = 800;
+        int panelY = 20;
+
         // 4. Xử lý khi đang trong ván chơi
         if (gp.start) {
-            if (new Rectangle(895, 20, 100, 50).contains(x, y)) {
+            // Nút "Trở về" góc trái dưới: g.fillRoundRect(10, 540, 100, 45, 20, 20);
+            if (new Rectangle(10, 540, 100, 45).contains(x, y)) {
                 if (end == 0)
                     saveGame();
                 else
@@ -582,13 +646,13 @@ public class GameController {
             }
 
             if (isPvE && end == 0) {
-                // KIỂM TRA CLICK CÁC NÚT PVE VỚI TOẠ ĐỘ VÙNG CLICK ĐÃ ĐƯỢC CHỈNH CHUẨN XÁC
-                if (y >= 440 && y <= 510) {
-                    if (x >= 680 && x <= 720) {
+                int boxX = xanhPanelX + 25;
+                int boxY = panelY + 350;
+                if (new Rectangle(boxX, boxY, 130, 50).contains(x, y)) {
+                    if (x >= boxX && x <= boxX + 65) {
                         goiYNuocDi();
                         return;
-                    }
-                    else if (x >= 740 && x <= 800) {
+                    } else if (x >= boxX + 65 && x <= boxX + 130) {
                         undoMove();
                         return;
                     }
@@ -598,7 +662,10 @@ public class GameController {
             if (end == 0) {
                 if (isPvE && !chonBlue)
                     return;
-                if (chuMo && new Rectangle(700, 260, 80, 50).contains(x, y)) {
+                int moPanelX = chonBlue ? xanhPanelX : doPanelX;
+                int moCoX = moPanelX + 40;
+                int moCoY = panelY + 278;
+                if (chuMo && new Rectangle(moCoX, moCoY, 100, 35).contains(x, y)) {
                     if (!moCo) {
                         moCo = true;
                         setMoCo();
@@ -612,19 +679,23 @@ public class GameController {
                         chonO(i, j, true);
                     }
                 } else {
-                    int j = (x - 63) / 127, i = (y - 13) / 127;
-                    if (i < 5 && j < 5) {
-                        Ellipse2D elip = new Ellipse2D.Float(board[i][j][0], board[i][j][1], 30, 30);
-                        if (elip.contains(x - 50, y)) {
-                            if (!moCo)
-                                chonO(i, j, true);
-                            else
-                                chonOSauKhiMoCo(i, j, board[i][j][2]);
+                    // Loop qua tát cả điểm neo trên board_paint được vẽ ở x=225, y=25
+                    for (int r = 0; r < 5; r++) {
+                        for (int c = 0; c < 5; c++) {
+                            Ellipse2D elip = new Ellipse2D.Float(board[r][c][0], board[r][c][1], 30, 30);
+                            if (elip.contains(x - 225, y - 25)) {
+                                if (!moCo)
+                                    chonO(r, c, true);
+                                else
+                                    chonOSauKhiMoCo(r, c, board[r][c][2]);
+                            }
                         }
                     }
                 }
             } else {
-                if (new Rectangle(180, 290, 240, 80).contains(x, y)) {
+                // End game dialog "Tiếp tục": Được vẽ trong board_paint tại (130, 150)
+                // Offset bảng 225, 25 -> 225+130=355
+                if (new Rectangle(355, 315, 240, 80).contains(x, y)) {
                     deleteCurrentSaveFile();
                     choiLaiVanMoi();
                 }
@@ -961,11 +1032,11 @@ public class GameController {
     private void kiemTraKetThuc() {
         if (quanDo.size() == 0) {
             end = 1;
-            sm.addResult("XANH", isPvE);
+            sm.addResult("XANH", isPvE, playerNameBlue);
             deleteCurrentSaveFile();
         } else if (quanXanh.size() == 0) {
             end = -1;
-            sm.addResult("DO", isPvE);
+            sm.addResult("DO", isPvE, playerNameRed);
             deleteCurrentSaveFile();
         } else {
             BanCo bc = createBanCoAo();
@@ -979,12 +1050,12 @@ public class GameController {
                 if (chonBlue) {
                     System.out.println("Xanh bị vây chặt hết đường đi! ĐỎ THẮNG!");
                     end = -1;
-                    sm.addResult("DO", isPvE);
+                    sm.addResult("DO", isPvE, playerNameRed);
                     deleteCurrentSaveFile();
                 } else {
                     System.out.println("Đỏ bị vây chặt hết đường đi! XANH THẮNG!");
                     end = 1;
-                    sm.addResult("XANH", isPvE);
+                    sm.addResult("XANH", isPvE, playerNameBlue);
                     deleteCurrentSaveFile();
                 }
             }

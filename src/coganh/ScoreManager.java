@@ -31,9 +31,9 @@ public class ScoreManager {
         }
     }
 
-    public void addResult(String winner, boolean isPvE) {
+    public void addResult(String winner, boolean isPvE, String name) {
         String mode = isPvE ? "PvE" : "PvP";
-        String record = winner + "|" + mode;
+        String record = winner + "|" + mode + "|" + name;
         
         history.add(record);
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, true))) {

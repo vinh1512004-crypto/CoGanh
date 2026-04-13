@@ -81,7 +81,7 @@ public class ScoreManager {
     public int getTotalPvEGames() {
         int count = 0;
         for (String s : history) {
-            if (s.endsWith("PvE")) count++;
+            if (s.contains("|PvE|")) count++;
         }
         return count;
     }
@@ -89,7 +89,7 @@ public class ScoreManager {
     public int getPvEBlueWins() {
         int count = 0;
         for (String s : history) {
-            if (s.startsWith("XANH") && s.endsWith("PvE")) count++;
+            if (s.startsWith("XANH") && s.contains("|PvE|")) count++;
         }
         return count;
     }
@@ -97,7 +97,7 @@ public class ScoreManager {
     public int getPvERedWins() {
         int count = 0;
         for (String s : history) {
-            if (s.startsWith("DO") && s.endsWith("PvE")) count++;
+            if (s.startsWith("DO") && s.contains("|PvE|")) count++;
         }
         return count;
     }

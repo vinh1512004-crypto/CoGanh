@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -38,8 +39,39 @@ public class GameController {
     public int helpCount = 0;
     public static final int MAX_HELP = 3;
 
-    public int doKhoAI = 4;
+    public int doKhoAI = 5;
     public boolean dangChonDoKho = false;
+
+    // --- PHÁT HIỆN LẶP VÔ HẠN ---
+    // Lưu tần suất xuất hiện của từng trạng thái board (hash -> số lần)
+    public HashMap<String, Integer> lichSuBoardHash = new HashMap<>();
+    // Danh sách thứ tự các hash để BotAI tham chiếu
+    public ArrayList<String> lichSuHashList = new ArrayList<>();
+    // Nếu cùng 1 trạng thái xuất hiện >= MAX_LAP lần thì bot thua (lặp vô hạn)
+    private static final int MAX_LAP = 6;
+
+    // --- HỆ THỐNG THĂNG HẠNG TỰ ĐỘNG ---
+    public int consecutiveWins = 0;          // Số ván thắng liên tiếp trong PvE
+    private static final int WINS_TO_RANK_UP = 5; // Cần thắng bao nhiêu ván để thăng hạng
+    public static final int WINS_PHASE1 = 3;     // 3 ván đầu ở độ khó gốc của rank
+    public String endGameSubMsg = null;      // Thông điệp phụ hiển trong popup kết thúc ván
+
+    /**
+     * Tính độ khó thực tế cho bot trong ván hiện tại.
+     * - 3 ván đầu (consecutiveWins < WINS_PHASE1): dùng doKhoAI gốc.
+     * - 2 ván cuối (consecutiveWins >= WINS_PHASE1): tăng thêm 1 để thử thách.
+     * - Hard (doKhoAI=5) hoặc đã max: giữ nguyên.
+     */
+    public int getEffectiveDoKho() {
+        if (!isPvE) return doKhoAI;
+        // Hard đã là max, không tăng thêm
+        if (doKhoAI >= 5) return 5;
+        // 2 ván cuối của chu kỳ 5 ván: tăng độ khó +1
+        if (consecutiveWins >= WINS_PHASE1) {
+            return doKhoAI + 1;
+        }
+        return doKhoAI;
+    }
 
     public ArrayList<Integer> quanDo = new ArrayList<>();
     public ArrayList<Integer> quanXanh = new ArrayList<>();
@@ -389,6 +421,10 @@ public class GameController {
         quanXanh.add(20);
         undoCount = 0;
         helpCount = 0;
+        // Reset lịch sử phát hiện lặp
+        lichSuBoardHash.clear();
+        lichSuHashList.clear();
+        endGameSubMsg = null; // Reset thông điệp phụ
         if (isPvE) {
             historyStack.clear();
             historyStack.add(new GameStateSnapshot());
@@ -447,15 +483,51 @@ public class GameController {
         return banCoAo;
     }
 
+    // Tạo chuỗi hash đại diện cho trạng thái bàn cờ hiện tại
+    private String taoHashBoardHienTai() {
+        StringBuilder sb = new StringBuilder(25);
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 5; j++) {
+                int v = board[i][j][2];
+                sb.append(v == 0 ? '0' : (v == 1 ? 'B' : 'R'));
+            }
+        }
+        return sb.toString();
+    }
+
+    // Ghi nhận trạng thái board vào lịch sử
+    public void ghiNhanBoardHienTai() {
+        String hash = taoHashBoardHienTai();
+        lichSuHashList.add(hash);
+        lichSuBoardHash.merge(hash, 1, Integer::sum);
+    }
+
     public void botTurn() {
+        // Kiểm tra lặp vô hạn trước khi bot đi
+        String hashHienTai = taoHashBoardHienTai();
+        int soLanLap = lichSuBoardHash.getOrDefault(hashHienTai, 0);
+        if (soLanLap >= MAX_LAP) {
+            System.out.println("Bot lặp trạng thái " + soLanLap + " lần! Bot nhận thua do lặp vô hạn.");
+            end = 1;
+            sm.addResult("XANH", isPvE, playerNameBlue);
+            deleteCurrentSaveFile();
+            gp.veLaiToanBo();
+            return;
+        }
+
         BanCo banCoAo = createBanCoAo();
         BotAI ai = new BotAI();
-        NuocDi nuocDiTotNhat = ai.timNuocDiTotNhat(banCoAo, -1, doKhoAI);
+        // Dùng độ khó thực tế (tăng ở 2 ván cuối của chu kỳ 5 ván)
+        int doKhoHienTai = getEffectiveDoKho();
+        System.out.println("[Bot] Độ khó thực tế: " + doKhoHienTai + " (rank=" + doKhoAI + ", ván thứ=" + (consecutiveWins + 1) + ")");
+        NuocDi nuocDiTotNhat = ai.timNuocDiTotNhat(banCoAo, -1, doKhoHienTai, lichSuHashList);
 
         if (nuocDiTotNhat != null) {
             System.out.println("Bot quyết định đi: (" + nuocDiTotNhat.hangCu + ", " + nuocDiTotNhat.cotCu + ") -> ("
                     + nuocDiTotNhat.hangMoi + ", " + nuocDiTotNhat.cotMoi + ")");
             thucHienNuocDiBot(nuocDiTotNhat.hangCu, nuocDiTotNhat.cotCu, nuocDiTotNhat.hangMoi, nuocDiTotNhat.cotMoi);
+            // Ghi nhận trạng thái board SAU khi bot di chuyển
+            ghiNhanBoardHienTai();
         } else {
             System.out.println("CẢNH BÁO: Bot đã hết nước đi hợp lệ! NGƯỜI CHƠI THẮNG!");
             end = 1;
@@ -464,6 +536,7 @@ public class GameController {
             gp.veLaiToanBo();
         }
     }
+
 
     public void botKill() {
         if (oBatBuoc == -1) {
@@ -498,6 +571,10 @@ public class GameController {
     }
 
     private void thucHienNuocDiBot(int r1, int c1, int r2, int c2) {
+        // Reset hết state Mở cờ từ lượt trước trước khi bot đi
+        chuMo = false;
+        listMo.clear();
+        listBiMo.clear();
         chonO(r1, c1, false);
         if (chuMo && listMo.contains(r2 * 10 + c2)) {
             System.out.println("Bot vừa Mở cờ! Bắt buộc Người chơi phe Xanh phải Gánh.");
@@ -693,9 +770,9 @@ public class GameController {
                     }
                 }
             } else {
-                // End game dialog "Tiếp tục": Được vẽ trong board_paint tại (130, 150)
-                // Offset bảng 225, 25 -> 225+130=355
-                if (new Rectangle(355, 315, 240, 80).contains(x, y)) {
+                // End game dialog "Tiếp tục": vẽ ở y=345 (bình thường) hoặc y=375 (có sub-msg)
+                // Offset bảng 225, 25 -> 225+130=355; y: 25+295=320 đến 25+430=455
+                if (new Rectangle(355, 315, 240, 140).contains(x, y)) {
                     deleteCurrentSaveFile();
                     choiLaiVanMoi();
                 }
@@ -709,11 +786,11 @@ public class GameController {
                     dangChonDoKho = false;
                     kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 90, 300, 50).contains(x, y)) {
-                    doKhoAI = 2;
+                    doKhoAI = 3;
                     dangChonDoKho = false;
                     kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 160, 240, 50).contains(x, y)) {
-                    doKhoAI = 4;
+                    doKhoAI = 5;
                     dangChonDoKho = false;
                     kiemTraVaVaoGame(true);
                 } else if (new Rectangle(40, 230, 240, 50).contains(x, y)) {
@@ -873,6 +950,15 @@ public class GameController {
                     }
                 }
                 board[oCu_i][oCu_j][2] = 0;
+
+                // Dọn dẹp: reset tất cả quân còn kẹt ở trạng thái 4 (đen) trên toàn bàn cờ
+                for (int ii = 0; ii < 5; ii++) {
+                    for (int jj = 0; jj < 5; jj++) {
+                        if (board[ii][jj][2] == 4) {
+                            board[ii][jj][2] = chonBlue ? 1 : -1;
+                        }
+                    }
+                }
 
                 if (chonBlue) {
                     startAnimation(oCu_i, oCu_j, i, j, 1);
@@ -1034,10 +1120,12 @@ public class GameController {
             end = 1;
             sm.addResult("XANH", isPvE, playerNameBlue);
             deleteCurrentSaveFile();
+            xuLyThangHang(true);
         } else if (quanXanh.size() == 0) {
             end = -1;
             sm.addResult("DO", isPvE, playerNameRed);
             deleteCurrentSaveFile();
+            xuLyThangHang(false);
         } else {
             BanCo bc = createBanCoAo();
             if (chuMo && oBatBuoc != -1) {
@@ -1052,15 +1140,80 @@ public class GameController {
                     end = -1;
                     sm.addResult("DO", isPvE, playerNameRed);
                     deleteCurrentSaveFile();
+                    xuLyThangHang(false);
                 } else {
                     System.out.println("Đỏ bị vây chặt hết đường đi! XANH THẮNG!");
                     end = 1;
                     sm.addResult("XANH", isPvE, playerNameBlue);
                     deleteCurrentSaveFile();
+                    xuLyThangHang(true);
                 }
             }
         }
     }
+
+    /**
+     * Xử lý hệ thống thăng hạng tự động trong chế độ PvE.
+     * @param nguoiThang true nếu người chơi (Xanh) thắng, false nếu thua
+     */
+    private void xuLyThangHang(boolean nguoiThang) {
+        if (!isPvE) return; // Chỉ áp dụng trong PvE
+
+        if (nguoiThang) {
+            consecutiveWins++;
+            System.out.println("Chuỗi thắng: " + consecutiveWins + "/" + WINS_TO_RANK_UP);
+
+            if (consecutiveWins >= WINS_TO_RANK_UP) {
+                // Đủ 5 ván → THĂNG HẠNG
+                int doKhoCu = doKhoAI;
+                if (doKhoAI == 1) {
+                    doKhoAI = 3; // Easy → Medium
+                } else if (doKhoAI == 3) {
+                    doKhoAI = 5; // Medium → Hard
+                }
+                consecutiveWins = 0;
+
+                if (doKhoAI != doKhoCu) {
+                    String capBacMoi = getRankName(doKhoAI);
+                    endGameSubMsg = "🏆 Thăng hạng lên " + capBacMoi + "! Xuất sắc!";
+                    System.out.println("THĂNG HẠNG! Độ khó: " + doKhoCu + " → " + doKhoAI);
+                } else {
+                    // Đã ở mức Hard rồi
+                    endGameSubMsg = "🏆 Đỉnh cao! Chinh phục tất cả cấp độ!";
+                }
+            } else {
+                // Chưa đủ 5 ván — thông báo tiến độ theo phase
+                if (consecutiveWins == WINS_PHASE1) {
+                    // Vừa đạt 3 thắng → bước vào Phase 2 (độ khó tăng)
+                    int doKhoGiai2 = (doKhoAI < 5) ? doKhoAI + 1 : 5;
+                    endGameSubMsg = "🏆 Phase 2! Bot khó hơn (lv " + doKhoGiai2 + "). Còn " + (WINS_TO_RANK_UP - consecutiveWins) + " ván!";
+                } else if (consecutiveWins < WINS_PHASE1) {
+                    // Đang trong Phase 1 (độ khó gốc)
+                    endGameSubMsg = "🏆 Phase 1: " + consecutiveWins + "/" + WINS_PHASE1 + " ván. Còn " + (WINS_TO_RANK_UP - consecutiveWins) + " ván nữa!";
+                } else {
+                    // Đang trong Phase 2
+                    int p2done = consecutiveWins - WINS_PHASE1;
+                    int p2total = WINS_TO_RANK_UP - WINS_PHASE1;
+                    endGameSubMsg = "🏆 Phase 2: " + p2done + "/" + p2total + " ván. Còn " + (WINS_TO_RANK_UP - consecutiveWins) + " ván nữa!";
+                }
+            }
+        } else {
+            // Thua: reset chuỗi thắng
+            if (consecutiveWins > 0) {
+                endGameSubMsg = "💔 Gãy chuỗi! (" + consecutiveWins + " thắng). Về " + getRankName(doKhoAI);
+                System.out.println("Thua! Chuỗi thắng bị reset (" + consecutiveWins + " → 0)");
+            }
+            consecutiveWins = 0;
+        }
+    }
+
+    /** Trả về tên rank theo doKhoAI */
+    private String getRankName(int dk) {
+        if (dk == 1) return "Easy";
+        if (dk == 3) return "Medium";
+        return "Hard";
+    }
+
 
     private void xuLyLuotTiepTheo() {
         if (isPvE && end == 0) {

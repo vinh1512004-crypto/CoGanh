@@ -26,6 +26,7 @@ public class GamePanel_CoGanh extends JPanel {
     public static final int SCREEN_HEIGHT = 600;
 
     public BufferedImage background_paint, board_paint, on, off, hdImg, left, right, back, undoIcon, logoImg, hoTroIcon, khungImg, kChuaImg;
+    public BufferedImage pieceRed, pieceBlue; // Q_Do.png và Q_Xanh.png
     public BufferedImage[] hd = new BufferedImage[3];
     public BufferedImage[] avatars = new BufferedImage[6];
     private BufferedImage boardImg, background, backgr;
@@ -227,7 +228,16 @@ public class GamePanel_CoGanh extends JPanel {
             undoIcon = ImageIO.read(getClass().getResourceAsStream("QL.png"));
             logoImg = ImageIO.read(getClass().getResourceAsStream("Logo.png"));
             hoTroIcon = ImageIO.read(getClass().getResourceAsStream("hotro.png"));
-            
+            try {
+                pieceRed = ImageIO.read(getClass().getResourceAsStream("Q_Do.png"));
+            } catch (Exception ex) {
+                System.out.println("Không tìm thấy Q_Do.png, dùng màu mặc định.");
+            }
+            try {
+                pieceBlue = ImageIO.read(getClass().getResourceAsStream("Q_Xanh.png"));
+            } catch (Exception ex) {
+                System.out.println("Không tìm thấy Q_Xanh.png, dùng màu mặc định.");
+            }
 
 
             try {
@@ -730,33 +740,52 @@ public class GamePanel_CoGanh extends JPanel {
                         if (gc.isAnimating && i == gc.animDestRow && j == gc.animDestCol) {
                             continue;
                         }
-                        if (gc.board[i][j][2] == -1)
-                            g.setColor(Color.red);
-                        else if (gc.board[i][j][2] == 1)
-                            g.setColor(Color.blue);
-                        else if (gc.board[i][j][2] == 2)
-                            g.setColor(Color.CYAN);
-                        else if (gc.board[i][j][2] == -2)
-                            g.setColor(Color.yellow);
-                        else if (gc.board[i][j][2] == 3)
-                            g.setColor(Color.white);
-                        else if (gc.board[i][j][2] == 4)
-                            g.setColor(Color.black);
-                        g.fillOval(gc.board[i][j][0], gc.board[i][j][1], 30, 30);
+                        int px = gc.board[i][j][0];
+                        int py = gc.board[i][j][1];
+                        int psize = 40;      // kích thước quân cờ thật
+                        int hsize = 20;      // kích thước chấm gợi ý đích
+                        int hoff = (psize - hsize) / 2; // offset căn giữa ô
+                        if (gc.board[i][j][2] == -1) {
+                            if (pieceRed != null)
+                                g.drawImage(pieceRed, px, py, psize, psize, null);
+                            else { g.setColor(Color.red); g.fillOval(px, py, psize, psize); }
+                        } else if (gc.board[i][j][2] == 1) {
+                            if (pieceBlue != null)
+                                g.drawImage(pieceBlue, px, py, psize, psize, null);
+                            else { g.setColor(Color.blue); g.fillOval(px, py, psize, psize); }
+                        } else if (gc.board[i][j][2] == 2) {
+                            // Quân đang được chọn (xanh) — giữ size đầy đủ
+                            g.setColor(Color.CYAN); g.fillOval(px, py, psize, psize);
+                        } else if (gc.board[i][j][2] == -2) {
+                            // Quân đang được chọn (đỏ) — giữ size đầy đủ
+                            g.setColor(Color.yellow); g.fillOval(px, py, psize, psize);
+                        } else if (gc.board[i][j][2] == 3) {
+                            // Chấm gợi ý ô đích — nhỏ, căn giữa
+                            g.setColor(Color.white); g.fillOval(px + hoff, py + hoff, hsize, hsize);
+                        } else if (gc.board[i][j][2] == 4) {
+                            g.setColor(Color.black); g.fillOval(px + hoff, py + hoff, hsize, hsize);
+                        }
                     }
                 }
             }
 
             if (gc.isAnimating) {
-                if (gc.animPieceType == -1)
-                    g.setColor(Color.red);
-                else if (gc.animPieceType == 1)
-                    g.setColor(Color.blue);
-                else if (gc.animPieceType == 2)
-                    g.setColor(Color.CYAN);
-                else if (gc.animPieceType == -2)
-                    g.setColor(Color.yellow);
-                g.fillOval((int) gc.animCurrX, (int) gc.animCurrY, 30, 30);
+                int ax = (int) gc.animCurrX;
+                int ay = (int) gc.animCurrY;
+                int psize = 40;
+                if (gc.animPieceType == -1) {
+                    if (pieceRed != null)
+                        g.drawImage(pieceRed, ax, ay, psize, psize, null);
+                    else { g.setColor(Color.red); g.fillOval(ax, ay, psize, psize); }
+                } else if (gc.animPieceType == 1) {
+                    if (pieceBlue != null)
+                        g.drawImage(pieceBlue, ax, ay, psize, psize, null);
+                    else { g.setColor(Color.blue); g.fillOval(ax, ay, psize, psize); }
+                } else if (gc.animPieceType == 2) {
+                    g.setColor(Color.CYAN); g.fillOval(ax, ay, psize, psize);
+                } else if (gc.animPieceType == -2) {
+                    g.setColor(Color.yellow); g.fillOval(ax, ay, psize, psize);
+                }
             }
             if (gc.end != 0) {
                 // Tính chiều cao box: cao hơn nếu có sub-message

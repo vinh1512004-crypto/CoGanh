@@ -133,8 +133,8 @@ public class GameSaveData implements Serializable {
                 gc.undoCount = 0;
             }
             if (sc.hasNextInt()) {
-                int doKhoCu = sc.nextInt();
-                System.out.println("Ván cũ (Depth " + doKhoCu + ") -> Đổi sang độ khó mới (Depth " + gc.doKhoAI + ")");
+                gc.doKhoAI = sc.nextInt(); // Load lại độ khó đã lưu
+                System.out.println("Loaded doKhoAI: " + gc.doKhoAI);
             }
             if (sc.hasNextInt()) {
                 gc.helpCount = sc.nextInt();
@@ -170,13 +170,18 @@ public class GameSaveData implements Serializable {
             sc.close();
 
             // Làm sạch các trạng thái tạm thời bị lưu (đang chọn, ô đích, quân bị vây...)
+            // Quân trạng thái 4 là quân bị Mở cờ, thuộc về phe ĐANG chờ bị bắt
+            // Phe đó là đối phương của phe đang có lượt (chonBlue):
+            // - Nếu chonBlue=true (lượt Xanh) → Xanh Mở cờ → quân bị vây là Đỏ (-1)
+            // - Nếu chonBlue=false (lượt Đỏ) → Đỏ Mở cờ → quân bị vây là Xanh (1)
+            int pheBiVay = gc.chonBlue ? -1 : 1;
             for (int i = 0; i < 5; i++) {
                 for (int j = 0; j < 5; j++) {
                     int val = gc.board[i][j][2];
-                    if (val == 2)  gc.board[i][j][2] = 1;   // xanh đang chọn -> xanh
-                    if (val == -2) gc.board[i][j][2] = -1;  // đỏ đang chọn  -> đỏ
-                    if (val == 3)  gc.board[i][j][2] = 0;   // ô đích        -> trống
-                    if (val == 4)  gc.board[i][j][2] = (gc.chonBlue ? 1 : -1); // quân bị vây
+                    if (val == 2)  gc.board[i][j][2] = 1;      // xanh đang chọn -> xanh
+                    if (val == -2) gc.board[i][j][2] = -1;     // đỏ đang chọn  -> đỏ
+                    if (val == 3)  gc.board[i][j][2] = 0;      // ô đích        -> trống
+                    if (val == 4)  gc.board[i][j][2] = pheBiVay; // quân bị vây -> đúng phe
                 }
             }
             // Reset trạng thái đang hành động

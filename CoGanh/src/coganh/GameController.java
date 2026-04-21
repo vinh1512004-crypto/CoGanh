@@ -464,9 +464,7 @@ public class GameController {
                         deleteCurrentSaveFile();
                     }
                 } else {
-                    if (isPvE)
-                        return; // Máy đánh không tính thời gian
-                    timeLeftRed--;
+                    timeLeftRed--; // Timer chỉ chạy trong PvP nên luôn tính thời gian cho cả 2 phe
                     if (timeLeftRed <= 0) {
                         end = 1; // Xanh thắng
                         timeoutEnd = true;

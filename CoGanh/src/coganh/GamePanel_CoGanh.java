@@ -872,6 +872,8 @@ public class GamePanel_CoGanh extends JPanel {
                 g.drawString("Tiếp tục", 130 + 340 / 2 - tiepW / 2, tiepY);
 
                 g.dispose();
+            } else {
+                g.dispose(); // Luôn giải phóng Graphics sau khi vẽ xong bảng cờ
             }
         }
         this.repaint();
@@ -920,9 +922,11 @@ public class GamePanel_CoGanh extends JPanel {
             g2.setColor(Color.white);
             if (hdImg != null)
                 g2.drawImage(hdImg, 100, 30, 800, 540, this);
-            if (right != null)
+            // Chỉ vẽ mũi tên phải khi KHÔNG phải trang cuối
+            if (right != null && gc.trangHD < 2)
                 g2.drawImage(right, 810, 490, 50, 50, this);
-            if (left != null)
+            // Chỉ vẽ mũi tên trái khi KHÔNG phải trang đầu
+            if (left != null && gc.trangHD > 0)
                 g2.drawImage(left, 750, 490, 50, 50, this);
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("Times New Roman", Font.BOLD, 30));

@@ -1,6 +1,13 @@
 {
-    "java.project.sourcePaths": [
-        "src"
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-25",
+            "path": "C:\\Users\\Vinh\\AppData\\Roaming\\Code\\User\\globalStorage\\pleiades.java-extension-pack-jdk\\java\\25",
+            "default": true
+        }
     ],
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.jdt.ls.java.home": "C:\\Users\\Vinh\\AppData\\Roaming\\Code\\User\\globalStorage\\pleiades.java-extension-pack-jdk\\java\\25",
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.project.sourcePaths": ["CoGanh/src"],
+    "java.project.outputPath": "CoGanh/bin"
 }

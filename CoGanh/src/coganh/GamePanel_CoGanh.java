@@ -54,10 +54,10 @@ public class GamePanel_CoGanh extends JPanel {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 if (gc != null && gc.xemLichSu && gc.trangLS == 0) {
-                    gc.cuonLichSu += e.getWheelRotation() * 30;
+                    gc.cuonLichSu += e.getWheelRotation() * 35;
                     if (gc.cuonLichSu < 0) gc.cuonLichSu = 0;
                     int totalGames = gc.sm.getTotalGames();
-                    int maxScroll = Math.max(0, (totalGames * 30) - 360);
+                    int maxScroll = Math.max(0, (totalGames * 35) - 360);
                     if (gc.cuonLichSu > maxScroll) gc.cuonLichSu = maxScroll;
                     veMenu();
                 }
@@ -70,7 +70,7 @@ public class GamePanel_CoGanh extends JPanel {
         menuBar.setBorderPainted(false);
 
         Color menuTextColor = Color.WHITE;
-        Font menuFont = new Font("Times New Roman", Font.BOLD, 16);
+        Font menuFont = new Font("Times New Roman", Font.BOLD, 18);
 
         // --- Menu THỂ LOẠI (PvP & PvE) ---
         categoryMenu = new JMenu("Thể loại");
@@ -130,7 +130,7 @@ public class GamePanel_CoGanh extends JPanel {
 
         JMenuItem hdItem = new JMenuItem("Hướng dẫn");
         JMenuItem lsItem = new JMenuItem("Lịch sử đấu");
-        JMenuItem undoItem = new JMenuItem("Đi lại (Undo)");
+        JMenuItem undoItem = new JMenuItem("Thu hồi lệnh (Undo)");
         JMenuItem hintItem = new JMenuItem("Gợi ý (Hint)");
 
         hdItem.addActionListener(e -> { 
@@ -343,7 +343,7 @@ public class GamePanel_CoGanh extends JPanel {
         g2.setStroke(new java.awt.BasicStroke(1));
         g2.setColor(Color.BLACK);
 
-        Font fontTieuDe = new Font("Times New Roman", Font.BOLD, 40);
+        Font fontTieuDe = new Font("Times New Roman", Font.BOLD, 44);
         g.setFont(fontTieuDe);
 
         if (gc.trangLS == 0) {
@@ -353,7 +353,8 @@ public class GamePanel_CoGanh extends JPanel {
             g.drawString(title1, 500 - (title1Width / 2), 70);
             g.drawLine(500 - (title1Width / 2) - 20, 85, 500 + (title1Width / 2) + 20, 85);
 
-            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 28));
+            g.setColor(new Color(139, 69, 19)); // Màu nâu gỗ đậm hơn làm điểm nhấn
             g.drawString("Ván", 200, 130);
             g.drawString("Chế độ", 450, 130);
             g.drawString("Kết quả", 700, 130);
@@ -362,7 +363,7 @@ public class GamePanel_CoGanh extends JPanel {
 
             // 1. LẤY TOÀN BỘ LỊCH SỬ THAY VÌ 12 VÁN
             ArrayList<String> recent = gc.sm.getRecentHistory(gc.sm.getTotalGames());
-            g.setFont(new Font("Times New Roman", Font.PLAIN, 22));
+            g.setFont(new Font("Times New Roman", Font.PLAIN, 25));
             int total = gc.sm.getTotalGames();
 
             // 2. TRỪ ĐI ĐỘ CUỘN (Scroll Offset)
@@ -396,7 +397,7 @@ public class GamePanel_CoGanh extends JPanel {
                 int rowIndex = recent.size() - 1 - i;
                 if (rowIndex % 2 == 0) {
                     g.setColor(new Color(0, 0, 0, 15)); // Sọc nền nhạt
-                    g.fillRect(150, y - 22, 700, 30);
+                    g.fillRect(150, y - 25, 700, 35);
                 }
 
                 g.setColor(Color.BLACK);
@@ -405,14 +406,14 @@ public class GamePanel_CoGanh extends JPanel {
                 g.drawString(mode, 450, y);
                 g.setColor(c);
                 g.drawString(winnerText, 700, y);
-                y += 30;
+                y += 35;
             }
 
             // 4. HỦY VÙNG CẮT (Để vẽ các nút bấm và chữ ở dưới cùng không bị che)
             g.setClip(null);
 
             g.setColor(new Color(200, 100, 0));
-            g.setFont(new Font("Times New Roman", Font.ITALIC, 20));
+            g.setFont(new Font("Times New Roman", Font.ITALIC, 22));
             g.drawString("Trang 1/2: Lịch sử chung (Lăn chuột để xem thêm)", 300, 550);
 
         } else if (gc.trangLS == 1) {
@@ -428,7 +429,7 @@ public class GamePanel_CoGanh extends JPanel {
             float blueRate = totalPvE == 0 ? 0 : ((float) bluePvE / totalPvE) * 100;
             float redRate = totalPvE == 0 ? 0 : ((float) redPvE / totalPvE) * 100;
 
-            g.setFont(new Font("Times New Roman", Font.PLAIN, 30));
+            g.setFont(new Font("Times New Roman", Font.PLAIN, 34));
             g.setColor(Color.BLACK);
             g.drawString("Tổng số ván đã chơi: " + totalPvE, 150, 160);
             g.setColor(Color.BLUE);
@@ -436,8 +437,8 @@ public class GamePanel_CoGanh extends JPanel {
             g.setColor(Color.RED);
             g.drawString(String.format("BotAI Thắng: %d ván (%.1f%%)", redPvE, redRate), 150, 300);
 
-            int barX = 150, barY = 360, barWidth = 700, barHeight = 45;
-            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            int barX = 150, barY = 360, barWidth = 700, barHeight = 50;
+            g.setFont(new Font("Times New Roman", Font.BOLD, 25));
             if (totalPvE > 0) {
                 int blueWidth = (int) (barWidth * ((float) bluePvE / totalPvE));
                 int redWidth = barWidth - blueWidth;
@@ -451,18 +452,18 @@ public class GamePanel_CoGanh extends JPanel {
 
                 g.setColor(Color.WHITE);
                 if (blueWidth > 80)
-                    g.drawString(String.format("%.1f%%", blueRate), barX + blueWidth / 2 - 30, barY + 30);
+                    g.drawString(String.format("%.1f%%", blueRate), barX + blueWidth / 2 - 30, barY + 34);
                 if (redWidth > 80)
-                    g.drawString(String.format("%.1f%%", redRate), barX + blueWidth + redWidth / 2 - 30, barY + 30);
+                    g.drawString(String.format("%.1f%%", redRate), barX + blueWidth + redWidth / 2 - 30, barY + 34);
             } else {
                 g.setColor(Color.DARK_GRAY);
                 g.fillRect(barX, barY, barWidth, barHeight);
                 g.setColor(Color.BLACK);
                 g.drawRect(barX, barY, barWidth, barHeight);
-                g.drawString("Chưa có dữ liệu ván đấu", barX + barWidth / 2 - 120, barY + 30);
+                g.drawString("Chưa có dữ liệu ván đấu", barX + barWidth / 2 - 120, barY + 34);
             }
             g.setColor(new Color(200, 100, 0));
-            g.setFont(new Font("Times New Roman", Font.ITALIC, 20));
+            g.setFont(new Font("Times New Roman", Font.ITALIC, 22));
             g.drawString("Trang 2/2: Thống kê AI", 400, 550);
         }
 
@@ -503,7 +504,7 @@ public class GamePanel_CoGanh extends JPanel {
             g.setColor(new Color(255, 255, 255, 150));
             g.fillRoundRect(10, 540, 100, 45, 20, 20);
             g.setColor(Color.BLACK);
-            g.setFont(new Font("Times New Roman", Font.BOLD, 25));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 28));
             g.drawString("Trở về", 22, 570);
 
             // --- KHU VỰC BÊN ĐỎ (Phe Đỏ / Máy) ---
@@ -530,7 +531,7 @@ public class GamePanel_CoGanh extends JPanel {
             // Đoạn code vẽ khungImg đã được gỡ bỏ theo tóm tắt yêu cầu của bạn
             
             // Tên đỏ
-            g.setFont(new Font("Times New Roman", Font.BOLD, 20));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
             String nameRed = gc.playerNameRed;
             FontMetrics fmRed = g.getFontMetrics();
             while (fmRed.stringWidth(nameRed) > panelW - 20 && g.getFont().getSize() > 12) {
@@ -544,7 +545,7 @@ public class GamePanel_CoGanh extends JPanel {
             g.setColor(new Color(140, 90, 40, 120));
             g.fillRoundRect(doPanelX + 20, panelY + 160, panelW - 40, 33, 18, 18);
             g.setColor(Color.WHITE);
-            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 24));
             String quanRedStr = "Quân: " + gc.quanDo.size();
             int quanRedW = g.getFontMetrics().stringWidth(quanRedStr);
             g.drawString(quanRedStr, doPanelX + (panelW - quanRedW) / 2, panelY + 183);
@@ -572,7 +573,7 @@ public class GamePanel_CoGanh extends JPanel {
             // Đoạn code vẽ khungImg đã được gỡ bỏ
             
             // Tên Xanh
-            g.setFont(new Font("Times New Roman", Font.BOLD, 20));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
             String nameBlue = gc.playerNameBlue;
             FontMetrics fmBlue = g.getFontMetrics();
             while (fmBlue.stringWidth(nameBlue) > panelW - 20 && g.getFont().getSize() > 12) {
@@ -586,7 +587,7 @@ public class GamePanel_CoGanh extends JPanel {
             g.setColor(new Color(140, 90, 40, 120));
             g.fillRoundRect(xanhPanelX + 20, panelY + 160, panelW - 40, 33, 18, 18);
             g.setColor(Color.WHITE);
-            g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+            g.setFont(new Font("Times New Roman", Font.BOLD, 24));
             String quanBlueStr = "Quân: " + gc.quanXanh.size();
             int quanBlueW = g.getFontMetrics().stringWidth(quanBlueStr);
             g.drawString(quanBlueStr, xanhPanelX + (panelW - quanBlueW) / 2, panelY + 183);
@@ -603,7 +604,7 @@ public class GamePanel_CoGanh extends JPanel {
                 // Timer Đỏ
                 g.setColor(new Color(140, 90, 40, 120));
                 g.fillRoundRect(doPanelX + 20, panelY + 200, panelW - 40, 33, 18, 18);
-                g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 24));
                 g.setColor(gc.timeLeftRed <= 30 ? Color.RED : Color.WHITE);
                 String tRed = timeRedStr;
                 g.drawString(tRed, doPanelX + (panelW - g.getFontMetrics().stringWidth(tRed)) / 2, panelY + 223);
@@ -611,7 +612,7 @@ public class GamePanel_CoGanh extends JPanel {
                 // Timer Xanh
                 g.setColor(new Color(140, 90, 40, 120));
                 g.fillRoundRect(xanhPanelX + 20, panelY + 200, panelW - 40, 33, 18, 18);
-                g.setFont(new Font("Times New Roman", Font.BOLD, 22));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 24));
                 g.setColor(gc.timeLeftBlue <= 30 ? Color.CYAN : Color.WHITE);
                 String tBlue = timeBlueStr;
                 g.drawString(tBlue, xanhPanelX + (panelW - g.getFontMetrics().stringWidth(tBlue)) / 2, panelY + 223);
@@ -626,7 +627,7 @@ public class GamePanel_CoGanh extends JPanel {
             if (gc.chuMo) {
                 // Bên nào đang có lượt thì hiển thị nút MỞ CỜ ở panel đó
                 int moPanelX = gc.chonBlue ? xanhPanelX : doPanelX;
-                Font moCoFont = new Font("Times New Roman", Font.BOLD, 30);
+                Font moCoFont = new Font("Times New Roman", Font.BOLD, 32);
                 g.setFont(moCoFont);
                 java.awt.FontMetrics fm = g.getFontMetrics();
                 String moCoText = "Mở cờ";
@@ -668,7 +669,7 @@ public class GamePanel_CoGanh extends JPanel {
                 int helpLeft = GameController.MAX_HELP - gc.helpCount;
                 if (helpLeft > 0) g.setColor(Color.YELLOW);
                 else g.setColor(Color.RED);
-                g.setFont(new Font("Times New Roman", Font.BOLD, 15));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 17));
                 g.drawString(String.valueOf(helpLeft), hoTroX + iconSize - 2, iconY + 10);
 
                 int undoX = boxX + 75; 
@@ -681,7 +682,7 @@ public class GamePanel_CoGanh extends JPanel {
                 int luotConLai = GameController.MAX_UNDO - gc.undoCount;
                 if (luotConLai > 0) g.setColor(Color.YELLOW);
                 else g.setColor(Color.RED);
-                g.setFont(new Font("Times New Roman", Font.BOLD, 15));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 17));
                 // Vẽ số còn lại undo
                 g.drawString(String.valueOf(luotConLai), undoX + iconSize - 2, iconY + 10);
 
@@ -808,7 +809,7 @@ public class GamePanel_CoGanh extends JPanel {
                 String winText = winnerName + " thắng!";
 
                 // Tự động scale cỡ chữ nếu tên quá dài (max 300px trong khung 340px)
-                int fontSize = 45;
+                int fontSize = 50;
                 g.setFont(new Font("Times New Roman", Font.BOLD, fontSize));
                 while (fontSize > 18 && g.getFontMetrics().stringWidth(winText) > 300) {
                     fontSize -= 2;
@@ -832,7 +833,7 @@ public class GamePanel_CoGanh extends JPanel {
                 if (coSubMsg) {
                     boolean laThangHang = gc.endGameSubMsg.startsWith("🏆");
                     g.setColor(laThangHang ? new Color(255, 230, 80) : new Color(255, 160, 180));
-                    g.setFont(new Font("Times New Roman", Font.BOLD, 17));
+                    g.setFont(new Font("Times New Roman", Font.BOLD, 19));
                     // Vẽ text xuống dòng nếu quá dài (word wrap thủ công)
                     // Bỏ emoji đầu (xử lý surrogate pair an toàn)
                     String rawMsg = gc.endGameSubMsg.trim();
@@ -866,7 +867,7 @@ public class GamePanel_CoGanh extends JPanel {
 
                 // Nút Tiếp tục
                 int tiepY = coSubMsg ? 375 : 345;
-                g.setFont(new Font("Times New Roman", Font.BOLD, 50));
+                g.setFont(new Font("Times New Roman", Font.BOLD, 55));
                 g.setColor(Color.yellow);
                 int tiepW = g.getFontMetrics().stringWidth("Tiếp tục");
                 g.drawString("Tiếp tục", 130 + 340 / 2 - tiepW / 2, tiepY);
@@ -929,7 +930,7 @@ public class GamePanel_CoGanh extends JPanel {
             if (left != null && gc.trangHD > 0)
                 g2.drawImage(left, 750, 490, 50, 50, this);
             g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Times New Roman", Font.BOLD, 30));
+            g2.setFont(new Font("Times New Roman", Font.BOLD, 33));
             g2.drawString("Back", 15, 65);
         } else if (gc != null && gc.xemLichSu) {
             veBangLichSu(g2);

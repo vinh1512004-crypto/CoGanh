@@ -380,7 +380,7 @@ public class GameController {
         }
 
         if (undoCount >= MAX_UNDO) {
-            JOptionPane.showMessageDialog(gp, "Bạn đã sử dụng hết " + MAX_UNDO + " lượt đi lại trong ván này!",
+            JOptionPane.showMessageDialog(gp, "Bạn đã sử dụng hết " + MAX_UNDO + " lượt thu hồi lệnh trong ván này!",
                     "Hết lượt", JOptionPane.WARNING_MESSAGE);
             return;
         }

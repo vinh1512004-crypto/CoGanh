@@ -1,20 +1,20 @@
  TRANGTHAI 
-true true false false false true false false
+true true false false false false false false
  NAMES 
-GIGIY
-GYGIYG (AI)
+Vinh
+Cò (AI)
  AVATARS 
-1 0
+0 0
  BIENSO 
-32 32 0 3 0 600 600
+1 11 2 5 0 600 600
  BANCO 
--1  1  1  0  1 
- 0 -1  0  1 -1 
--1  0 -1  0  0 
--1 -1  0 -1  0 
--1  0  4  1  1 
+-1  0  0  0  0 
+-1 -1 -1  1  0 
+-1 -1 -1  0  0 
+-1 -1 -1 -1 -1 
+-1 -1  0  0 -1 
  DANHSACH 
-0 11 14 20 22 30 31 33 40 
-1 2 4 13 42 43 44 
+0 10 11 12 20 21 22 30 31 32 33 34 40 41 44 
+13 
 -
 -
